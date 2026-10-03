@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+.env
+.env.*
+!.env.example
+.playwright-mcp/
+.claude/settings.local.json
+CLAUDE.local.md
+.DS_Store
+*.log
+# raw assets stay out of the repo; optimized copies live in web/public
+assets/models/*.blend
+# the OS skills live on each laptop (copy them into clones); they are never pushed
+.claude/skills/

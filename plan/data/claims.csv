@@ -1,0 +1,17 @@
+id,claim,label,source,used_in
+C1,"The Mohler short-answer dataset has 2,442 student answers to 87 questions from a data structures course, each marked by two human graders, licence CC-BY-4.0",F,[R1] https://huggingface.co/datasets/nkazi/MohlerASAG,slide demo readme qa
+C2,"On those 2,442 answers the two human graders gave the identical mark on 56.8% and were within one mark on 78.0% (Pearson 0.773)",M,"measured 2026-10-03 on the downloaded MohlerASAG cleaned parquet files, 2,442 rows",slide demo readme qa
+C3,A Government of West Bengal order (22 Feb 2019) credits college teachers 20-30 minutes per undergraduate answer script for evaluation,F,[R2] https://wbxpress.com/assessment-hours-spent-college-teacher-paper/,slide qa
+C4,"Under JNTUH R22 a theory subject has two mid-term exams per semester, each with a 20-mark descriptive part, plus assignments (read in one affiliated college's CIE procedure, not in the university regulation itself)",F,[R3] https://scient.ac.in/images/12._CIE_Procedure.pdf,qa
+C5,A student needs at least 14 of 40 internal marks (35%) to sit the semester-end exam under R22 (same college document),F,[R3] https://scient.ac.in/images/12._CIE_Procedure.pdf,qa
+C6,"University of Madras evaluators mark about 40 scripts a day at Rs 12 per script (DT Next, June 2026)",F,[R4] https://www.dtnext.in/amp/story/news/chennai/madras-university-lecturers-evaluation-boycott-to-delay-ug-results,qa
+C7,"Teachers surveyed in Canada, Singapore, the UK and the US spend six hours a week on evaluation and feedback (McKinsey, 2020; not India)",F,[R5] https://www.mckinsey.com/industries/education/our-insights/how-artificial-intelligence-will-impact-k-12-teachers,qa
+C8,Google's 30 Jun 2025 announcement of Gemini in Classroom describes rubric generation and suggested feedback for writing; it does not describe automatic marking,F,[R6] https://blog.google/outreach-initiatives/education/classroom-ai-features,qa
+C9,CoGrader's pricing page lists a free plan of 100 submissions a month and handwritten assignments on the $15 plan,F,[R7] https://cograder.com/pricing,qa
+C10,Eklavvya's page claims a 31% reduction in grading time per response and names NMIMS and Sharda University as clients,F,[R8] https://www.eklavvya.com/ai-answer-sheet-checking/,qa
+C11,"In a 2026 study on SciEntsBank, keeping only answers where repeated gradings agreed raised two-way accuracy to 81.1% while coverage fell to 85.6% (re-open the paper before quoting)",F,[R9] https://arxiv.org/html/2601.08843v1,qa
+C12,"In a blind single pass on 24 Mohler answers, Claude in a chat was within one mark of grader 2 on 24 of 24 and of grader 1 on 21 of 24; the two humans were within one mark of each other on 21 of 24. This is a probe, not our product",M,"run 2026-10-03 01:08, 24 answers, plan/data/probe_p2.csv",qa
+C13,"By the West Bengal norm, 60 scripts would be credited as 20 to 30 hours of evaluation; the norm is for university exam scripts, and class size 60 is our assumption",I,"arithmetic: 60 x 20 min = 20 h, 60 x 30 min = 30 h, norm from [R2]",qa
+C14,Hours our own college's lecturers spend marking a mid-term,U,,none
+C15,We pasted the same 8 real student answers into ChatGPT in two separate chats: the marks matched on 3 of 8 and the class total was 21 of 40 in one chat and 15 of 40 in the other (the two human graders: 26 and 24),M,"test 2026-10-03, 8 answers, plan/data/v3_chatbot_test.csv",slide demo qa
+C16,Whether our own grader gives the same marks when run twice on the same answers,U,,none

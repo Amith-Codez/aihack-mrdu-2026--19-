@@ -1,0 +1,124 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MarkMatch · style preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Caveat:wght@700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --background: oklch(0.985 0.007 262.0); /* #f7faff */
+  --surface: oklch(1.000 0.000 262.0); /* #ffffff */
+  --surface-2: oklch(0.955 0.012 262.0); /* #ecf0f8 */
+  --foreground: oklch(0.215 0.014 262.0); /* #161a20 */
+  --muted-foreground: oklch(0.425 0.030 262.0); /* #454f5f */
+  --border: oklch(0.863 0.024 262.0); /* #c9d2e2 */
+  --border-strong: oklch(0.657 0.030 262.0); /* #8892a4 */
+  --primary: oklch(0.550 0.190 262.0); /* #2d69de */
+  --primary-foreground: oklch(0.990 0.005 262.0); /* #fafcff */
+  --signal: oklch(0.640 0.131 92.0); /* #a98800 */
+  --signal-soft: oklch(0.945 0.057 92.0); /* #faecc2 */
+  --danger: oklch(0.448 0.150 27.0); /* #962521 */
+  --success: oklch(0.417 0.115 150.0); /* #005d27 */
+  --warning: oklch(0.438 0.109 55.0); /* #7e3e00 */
+  --info: oklch(0.425 0.085 230.0); /* #005674 */
+  --chart-1: oklch(0.600 0.140 262.0); /* #507ed3 */
+  --chart-2: oklch(0.600 0.140 337.0); /* #b35c9e */
+  --chart-3: oklch(0.600 0.140 22.0); /* #c65959 */
+  --chart-4: oklch(0.600 0.124 97.0); /* #957f00 */
+  --chart-5: oklch(0.600 0.140 142.0); /* #499442 */
+  --chart-6: oklch(0.600 0.107 217.0); /* #008faa */
+  --ring: oklch(0.640 0.131 92.0); /* #a98800 */
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--foreground);font:400 18px/1.5 "IBM Plex Sans",system-ui,sans-serif;
+ background:linear-gradient(90deg,transparent 46px,var(--danger) 46px,var(--danger) 49px,transparent 49px),repeating-linear-gradient(var(--background) 0 35px,var(--border) 35px 36px)}
+.wrap{max-width:1340px;margin:0 auto;padding:30px 28px 60px 78px}
+h1,h2,.disp{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;font-weight:800;letter-spacing:-.02em;margin:0}
+h1{font-size:64px;line-height:1} h2{font-size:26px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;white-space:nowrap}
+.pen{font-family:"Caveat",cursive;font-weight:700;color:var(--danger)}
+.muted{color:var(--muted-foreground)} .small{font-size:15px}
+.hl{background:linear-gradient(transparent 12%,var(--signal-soft) 12% 88%,transparent 88%);box-shadow:0 -5px 0 var(--signal) inset;padding:0 6px;display:inline-block;transform:rotate(-1.2deg)}
+.note{background:var(--surface);border:2.5px dashed var(--foreground);padding:10px 14px;margin:20px 0 26px;font-size:15px;border-radius:10px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.sticker{display:inline-block;font:800 17px "Bricolage Grotesque",sans-serif;background:var(--signal);color:var(--foreground);border:2.5px solid var(--foreground);border-radius:999px;padding:8px 16px;transform:rotate(4deg);box-shadow:4px 4px 0 var(--foreground)}
+.grid{display:grid;grid-template-columns:340px 1fr 340px;gap:24px;margin-top:8px}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:2.5px solid var(--foreground);border-radius:12px;padding:16px 18px;box-shadow:6px 6px 0 var(--foreground);position:relative}
+.card+.card{margin-top:20px}
+.card.blue{box-shadow:6px 6px 0 var(--primary)} .card.red{border-color:var(--danger);box-shadow:6px 6px 0 var(--danger)}
+.badge{display:inline-block;font:600 12px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;padding:6px 8px;border:2px solid var(--foreground);border-radius:6px;margin-right:8px;background:var(--surface);vertical-align:2px}
+.badge.agent{background:var(--primary);color:var(--primary-foreground);transform:rotate(-4deg)}
+.step{display:flex;gap:10px;padding:10px 0;border-bottom:2px dotted var(--border-strong)} .step:last-child{border:0}
+.ok{color:var(--success);font-weight:600} .bad{color:var(--danger);font-weight:600}
+mark{background:var(--signal-soft);box-shadow:0 -5px 0 var(--signal) inset;padding:2px 4px;color:inherit}
+.row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:baseline;padding:8px 0;border-top:2px dotted var(--border-strong)}
+.circle{font-size:54px;line-height:1;border:3.5px solid var(--danger);border-radius:50%;padding:2px 16px 8px;transform:rotate(-7deg);display:inline-block;white-space:nowrap}
+.round{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--surface-2);border:2px solid var(--foreground);border-radius:8px;margin-top:8px}
+.round.win{background:var(--signal-soft);box-shadow:4px 4px 0 var(--signal)}
+.stamp{position:absolute;right:14px;top:-16px;font:800 15px "Bricolage Grotesque",sans-serif;letter-spacing:.08em;color:var(--danger);border:3px solid var(--danger);border-radius:6px;padding:3px 10px;background:var(--surface);transform:rotate(7deg)}
+.stamp.green{color:var(--success);border-color:var(--success);transform:rotate(-6deg)}
+button{font:800 20px "Bricolage Grotesque",sans-serif;padding:13px 22px;border-radius:12px;border:2.5px solid var(--foreground);background:var(--primary);color:var(--primary-foreground);cursor:pointer;box-shadow:5px 5px 0 var(--foreground)}
+button:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--foreground)}
+button.ghost{background:var(--surface);color:var(--foreground)}
+button:focus-visible{outline:4px solid var(--ring);outline-offset:3px}
+.num{font:800 44px/1 "Bricolage Grotesque",sans-serif}
+.sw{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px} .sw div{width:124px;font-size:13px} .sw i{display:block;height:46px;border:2.5px solid var(--foreground);border-radius:10px;box-shadow:3px 3px 0 var(--foreground)}
+</style></head><body><div class="wrap">
+<div class="top"><div><div class="mono small muted">MARKMATCH · STYLE PREVIEW v2</div>
+<h1>It marks the way <span class="hl">you</span> mark.</h1></div>
+<div><span class="sticker">receipts for every mark ✓</span></div></div>
+<div class="note"><b>Sample content for the look only.</b> The question, the student answers and the human marks are real (Mohler dataset, CC-BY-4.0). The round counts and the tool's marks on this page are placeholders, not a real run.</div>
+
+<div class="grid">
+<div>
+ <div class="card"><h2>Steps</h2>
+  <div class="step"><span><span class="badge">CODE</span></span><span>Split 26 answers <span class="ok">✓ done</span></span></div>
+  <div class="step"><span><span class="badge">HUMAN</span></span><span>You marked six <span class="ok">✓ done</span></span></div>
+  <div class="step"><span><span class="badge agent">AGENT</span></span><span style="flex:1"><b>Match my marking</b>
+    <div class="round"><span>Round 1</span><span class="mono">3 of 6</span></div>
+    <div class="round"><span>Round 2</span><span class="mono">5 of 6</span></div>
+    <div class="round win"><span><b>Round 3</b></span><span class="mono">6 of 6</span></div>
+    <div class="pen" style="font-size:26px;line-height:1.1;margin-top:8px;transform:rotate(-2deg)">matches you now!</div>
+    <div class="small muted" style="margin-top:6px">Scheme note added in round 2: “Give 3 when the answer names harder insertion or deletion but not the extra memory.”</div></span></div>
+  <div class="step"><span><span class="badge">MODEL</span></span><span>Marking the other 20… <span class="mono">14 / 20</span></span></div>
+  <div class="step"><span><span class="badge">CODE</span></span><span>Checks: quote found · marks add up</span></div>
+  <div class="step"><span><span class="badge">HUMAN</span></span><span class="muted">You approve the class</span></div>
+ </div>
+</div>
+
+<div>
+ <div class="card blue"><div class="small muted mono">QUESTION 7 · 5 MARKS</div>
+  <h2 style="margin:4px 0 6px;font-size:30px;line-height:1.15">What is the main disadvantage of a doubly-linked list over a basic linked list?</h2>
+  <div class="small muted">Your scheme: extra space for the back pointers (5) · only harder insertion or deletion (3)</div></div>
+ <div class="card"><span class="stamp green">CHECKED ✓</span><div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start"><div><div class="small muted mono">STUDENT 08</div>
+  <p style="margin:6px 0 10px;font-size:21px">Double-linked lists <mark>require more space per node</mark>, and their elementary operations are more expensive.</p></div><div class="pen circle">5/5</div></div>
+  <div class="row"><span>Names the extra space for back pointers</span><span class="mono">5</span></div>
+  <div class="row"><span class="ok">✓ Quote found in the answer</span><span class="ok">✓ Marks add up</span></div></div>
+ <div class="card"><span class="stamp green">CHECKED ✓</span><div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start"><div><div class="small muted mono">STUDENT 09</div>
+  <p style="margin:6px 0 10px;font-size:21px"><mark>More difficult to delete and create nodes.</mark></p></div><div class="pen circle">3/5</div></div>
+  <div class="row"><span>Only harder insertion or deletion</span><span class="mono">3</span></div>
+  <div class="row"><span class="ok">✓ Quote found in the answer</span><span class="ok">✓ Marks add up</span></div></div>
+ <div class="card red"><span class="stamp">THROWN OUT ✗</span><div class="small mono bad">STUDENT 16 · MARK REJECTED</div>
+  <p style="margin:6px 0 8px;font-size:21px">The main disadvanate is that if hard to remove all items in the list.</p>
+  <div class="small">The tool quoted “uses more memory for the previous pointer”. <b>That line is not in this answer.</b> Asked again once; if it fails again, this answer goes to you unmarked.</div></div>
+</div>
+
+<div>
+ <div class="card"><h2>Your call</h2><p class="small muted" style="margin:6px 0 14px">Nothing is final until you approve. Change any mark first.</p>
+  <button>Approve 26 marks</button><div style="height:14px"></div><button class="ghost">Edit</button></div>
+ <div class="card"><h2>Proof</h2>
+  <div class="num" style="margin-top:8px">56.8%</div><div class="small">two human graders give the same mark</div>
+  <div class="num" style="margin-top:12px">78.0%</div><div class="small">…within one mark of each other</div>
+  <div class="small muted" style="margin-top:6px">2,442 real answers · measured 3 Oct 2026</div>
+  <div class="row" style="margin-top:8px"><span>This tool vs you, on answers it had not seen</span><span class="mono muted">after first run</span></div></div>
+ <div class="card red"><div class="small mono bad">⚠ MODEL NOT REACHABLE</div><p class="small" style="margin:6px 0 12px">Nothing was marked. Play the recorded real run instead.</p><button class="ghost">Play recorded run</button></div>
+</div>
+</div>
+
+<h2 style="margin-top:40px">Palette and type</h2>
+<div class="sw">
+<div><i style="background:var(--background)"></i>paper</div><div><i style="background:var(--foreground)"></i>ink (text, outlines, shadows)</div>
+<div><i style="background:var(--primary)"></i>blue ink (action)</div><div><i style="background:var(--signal-soft);box-shadow:0 -8px 0 var(--signal) inset,3px 3px 0 var(--foreground)"></i>highlighter (evidence)</div>
+<div><i style="background:var(--danger)"></i>red pen (marks, rejected)</div><div><i style="background:var(--success)"></i>check passed</div></div>
+<p class="disp" style="font-size:34px;margin:24px 0 4px">Bricolage Grotesque, loud, for headings and big numbers</p>
+<p style="margin:0">IBM Plex Sans for everything you read · <span class="mono">IBM Plex Mono 6 of 6</span> for counts · <span class="pen" style="font-size:30px">Caveat for the teacher's red pen</span></p>
+</div></body></html>

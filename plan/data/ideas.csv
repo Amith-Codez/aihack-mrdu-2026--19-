@@ -1,0 +1,7 @@
+id,title
+C1,"Doubt-first marker: locked scheme, a code-checked quote for every mark, two passes, disagreements first, teacher approves"
+C2,"Calibrate-then-mark: teacher marks 6 answers, the tool tunes the marking scheme until it matches her, then marks the rest"
+C3,"Second marker: teacher marks as usual, the tool only flags marks it disagrees with, with the quoted reason"
+C4,"Mistake map first: what the class got wrong, with quotes and counts, then the marks"
+C5,"Answer groups: near-identical answers grouped, teacher marks one per group, the mark spreads"
+C6,"Strictness dial: the same stack marked under strict, standard and lenient readings side by side; teacher picks the policy"

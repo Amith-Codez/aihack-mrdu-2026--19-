@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(npm view *)",
+      "Bash(npx shadcn@latest *)",
+      "Bash(npx create-next-app@latest *)",
+      "Bash(npx gltfjsx *)",
+      "Bash(npx @gltf-transform/cli *)",
+      "Bash(npx playwright install *)",
+      "Bash(node .claude/skills/*)",
+      "Bash(python3 .claude/skills/*)",
+      "Bash(ffmpeg *)",
+      "Bash(ffprobe *)",
+      "Bash(git init)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git pull)",
+      "Bash(git pull *)",
+      "Bash(git fetch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push)",
+      "Bash(git push origin *)",
+      "Bash(git remote *)",
+      "Bash(git switch *)",
+      "Bash(git branch *)",
+      "Bash(git tag *)",
+      "Bash(git push origin --tags)",
+      "Bash(git push --tags)",
+      "Bash(git merge *)",
+      "Bash(git checkout ok-*)",
+      "Bash(git stash *)",
+      "Bash(npx tsx *)",
+      "Bash(python3 .claude/skills/hv-mrdu/scripts/*)",
+      "Bash(gh repo create *)",
+      "Bash(gh auth status)",
+      "Bash(npx vercel *)",
+      "WebSearch",
+      "mcp__playwright__*"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "playwright"
+  ]
+}
