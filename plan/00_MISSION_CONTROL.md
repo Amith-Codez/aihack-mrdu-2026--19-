@@ -7,10 +7,10 @@
 **Last updated:** 3 Oct 2026 · **by:** B0 early setup (Claude Code)
 
 ## 1. WHERE WE ARE NOW
-- **Engine to use now:** 🧠 COWORK (pre-event)
-- **Step:** 6 done · Look approved (05): "Examiner's margin, loud" (ruled paper, ink outlines with hard shadows, circled red-pen marks, stamps), palette ALL PASS with all text ≥ 7:1, `pitch/style-preview.html` v2, audit P0 fixed
-- **Next action (one):** paste **P5** in Cowork (architecture, stack, build plan). B0 done (blank app live at https://aihack-mrdu-2026-19.vercel.app); repo pushed (public by team choice)
-- **Blocker:** **BEHIND: G2 (plan READY, 14:45) is missed; G3 (skeleton live, 15:45) will be missed too.** Recovery in force: P4 cut to palette plus one screen; P5 keeps the stack defaults. Open: funded API key and fallback key (SPIKE not started) · two lecturer conversations · the core is 6 h of 6 h with no slack, and it now starts late
+- **Engine to use now:** 🛠 CLAUDE CODE
+- **Step:** 7 done · Build plan **READY and APPROVED** (06). Planning is finished; Cowork stops
+- **Next action (one):** in Claude Code, paste **B1** (build step 0: the `/app` skeleton, due 18:00). **First put a free Gemini key and a free Groq key into `web/.env.local`**; step 1 tests them in its first 10 minutes. When B1 says "PLAN PUSHED", laptop B starts PITCH-1
+- **Blocker:** none, but **we are ~2.5 h late**: gates before round 1 were moved (G3 18:00 · G4 20:15 · G5 22:30 · G6 23:15) and the core was cut to 4.5 h (06 §3). The jury rounds do not move. Open: keys never tested · two lecturer conversations · no owner for the story page
 
 ## 2. Event
 | | |
@@ -44,7 +44,7 @@
 | 4 | Validation · existing solutions · gap · difference (stages 10–13) | 🧠 COWORK | P2 | 03 | — | DONE (HOME lane) · GO WITH FIXES |
 | 5 | Concept · agentic fit · features · scope freeze 1 (stages 14–16) | 🧠 COWORK | P3 | 04 | ✋ concept · ✋ scope | DONE · concept C2 · scope freeze 1 APPROVED 3 Oct |
 | 6 | Look of the hero screen | 🧠 COWORK | P4 | 05, `design/` | ✋ look | DONE · GO 3 Oct 15:22 |
-| 7 | Architecture · stack · gates (stages 17–19) | 🧠 COWORK | P5 | 06, `plan/data/gates.csv` | ✋ plan → 🛑 **MOVE TO CLAUDE CODE** | NOT STARTED |
+| 7 | Architecture · stack · gates (stages 17–19) | 🧠 COWORK | P5 | 06, `plan/data/gates.csv` | ✋ plan → 🛑 **MOVE TO CLAUDE CODE** | DONE · READY 3 Oct |
 | 8 | Evidence + pitch lane: eval cases, claims ledger, story, Q&A, deck | 🧠 COWORK (laptop B) | PITCH-1 · PITCH-2 | 08, `pitch/`, `plan/data/` | — | NOT STARTED |
 | 9 | Build · test · debug (stages 20–22): steps 0–2 = MVP | 🛠 CLAUDE CODE | B1 · B2 | `web/` | — | NOT STARTED |
 | 10 | Readiness audit 1 + jury round 1 (00:00) | either | AUDIT · ROUND-1 · ROUND | 09 §9, `plan/data/rounds.md` | — | NOT STARTED |
@@ -57,14 +57,14 @@
 |---|---|---|---|
 | H0 Hacking starts | 3 Oct 11:30 | The list is in `inputs/problem-statements/`; P1 and B0 start together | — |
 | G1 Problem approved | **12:30** | 02 §4 APPROVED (the recommendation stands 10 minutes after it is shown) | — |
-| G2 Plan READY → switch (scope freeze 1) | **14:45** | 06 READY; B1 says "PLAN PUSHED" and laptop B starts PITCH-1 | — |
-| G3 Skeleton live | 15:45 | `/app` opens in our design on the live URL | — |
-| Evidence pack pushed (laptop B) | 18:30 | `plan/data/eval_cases.csv` and `claims.csv` on main | — |
-| G4 Hero path on the mock | 18:45 | The run streams; Break it works; one real run; explain-it drill 1; presenter audition | — |
-| **G5 MVP: the real mechanism** | **21:45** | 3 clean hero runs on the live URL; eval numbers so far; tag `ok-mvp` | — |
-| Break session 1 (outsiders) | 21:45–22:05 | 10 unprepared inputs tried; breaks logged; P0 fixes on the hero path only | — |
-| AUDIT → ROUND-1 kit | 22:20 → 22:45 | Audit verdict, "AUDIT PUSHED", tag `ok-r1`, backup video 1; then the running order | — |
-| **G6 Round-1 freeze** (scope freeze 2) | **23:00** | No deploys until after our slot; 23:00–23:45 two timed rehearsals, explain-it drill 2 | — |
+| G2 Plan READY → switch (scope freeze 1) | **17:15** (was 14:45) | 06 READY; B1 says "PLAN PUSHED" and laptop B starts PITCH-1 | — |
+| G3 Skeleton live | 18:00 (was 15:45) | `/app` opens in our design on the live URL | — |
+| Evidence pack pushed (laptop B) | 20:30 (was 18:30) | `plan/data/eval_cases.csv` and `claims.csv` on main | — |
+| G4 Hero path on the mock | 20:15 (was 18:45) | The run streams; Break it works; one real run; explain-it drill 1; presenter audition | — |
+| **G5 MVP: the real mechanism** | **22:30** (was 21:45) | 3 clean hero runs on the live URL; eval numbers so far; tag `ok-mvp` | — |
+| Break session 1 (outsiders) | 22:30–22:45 | 10 unprepared inputs tried; breaks logged; P0 fixes on the hero path only | — |
+| AUDIT → ROUND-1 kit | 22:45 → 23:10 | Audit verdict, "AUDIT PUSHED", tag `ok-r1`, backup video 1; then the running order | — |
+| **G6 Round-1 freeze** (scope freeze 2) | **23:15** (was 23:00) | No deploys until after our slot; 23:00–23:45 two timed rehearsals, explain-it drill 2 | — |
 | **Jury round 1** | **00:00–01:30** | Full 3-minute pitch of what works; feedback logged | — |
 | Hour-14 reset (ROUND, RESET) | 01:30 | One jury suggestion chosen; three lanes: features · UI polish · bug testing; "RESET PUSHED" | — |
 | G7 Top 3 complete | 03:30 | Top 3 tested; the suggestion built; tag; break session 2 | — |
@@ -73,7 +73,7 @@
 | **G9 Submittable** | **07:00** | Repo, live URL, README, deck PDF; AUDIT (06:30) verdict; backup video 2 | — |
 | Rehearsals | 07:45–08:20 | 3 clean timed runs; explain-it drill 3 | — |
 | **Final round** | **08:30–10:00** | Submitted as instructed; in place 10 minutes early | — |
-Hours for the forge: core loop 6 h (steps 1–2) · **features 1.5 h** (step 4, after round 1) · polish 1.5 h.
+Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; was 6 h) · **features 1.5 h** (step 4, after round 1) · polish 1.5 h.
 
 ## 6. Build steps *(filled from 06 §9; status words: NOT STARTED · PARTIAL · DONE-UNTESTED · DONE-TESTED)*
 | # | Goal | Status | Live URL updated? | Tag |
@@ -113,6 +113,9 @@ Hours for the forge: core loop 6 h (steps 1–2) · **features 1.5 h** (step 4, 
 - 3 Oct · **Look = "Examiner's margin, loud"** · the lead asked for a Gen-Z look that fits the project; kept ≥ 7:1 text and no dependence on animation for the video call
 - 3 Oct · **Repo stays public** · team choice, accepted that plan files are visible
 - 3 Oct · **B0: Vercel project `aihack-mrdu-2026--19-` (team amith6), no Git connection, story: yes → cinematic packages installed on main** · deploys only from this laptop's CLI; one laptop may run both lanes (story in a second clone on branch `story`)
+- 3 Oct · **Build plan APPROVED → READY; engine switched to Claude Code**
+- 3 Oct 16:50 · **Gates before round 1 moved; core cut to 4.5 h** · planning ended ~2.5 h late and the rounds are fixed; cuts: sample class + one own-answer box, 2 tuning rounds, the hero run measures its own proof on 10 unseen answers (06 §3)
+- 3 Oct 16:50 · **Models: free Gemini (primary) + free Groq (fallback), ₹0** · team choice; overrides "paid primary"; the recorded replay is therefore part of the plan; keys untested
 - 2 Oct · **Production deploys only from laptop A's CLI** (Vercel's Git connection is disconnected in B0) · a teammate's push must never redeploy during a freeze
 
 ## 9. Top risks (max 3)
