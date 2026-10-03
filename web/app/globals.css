@@ -169,6 +169,25 @@
   .mm-filter button + button { border-left: 2.5px solid var(--ink); }
   .mm-filter button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
 
+  /* ── the run (step 1) ── */
+  .mm-q { background: var(--highlighter); color: var(--ink); padding: 0 2px; border-radius: 3px; box-shadow: 0 -3px 0 var(--signal) inset; }
+  .mm-crit { list-style: none; margin: 10px 0 0; padding: 8px 0 0; border-top: 2px dotted var(--border-strong); display: flex; flex-direction: column; gap: 4px; }
+  .mm-toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; border: 2px dashed var(--danger); border-radius: 10px; padding: 8px 12px; background: var(--surface); }
+  .mm-toggle input { width: 18px; height: 18px; accent-color: var(--danger); }
+  .mm-linkbtn { font: 600 14px var(--ff-mono), monospace; background: none; border: 0; padding: 4px 2px; color: var(--foreground); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .mm-running { color: var(--primary); font-weight: 600; }
+  .mm-step.is-running .mm-stepnum { background: var(--tint-blue); border-color: var(--primary); color: var(--primary); }
+  .mm-step.is-failed .mm-stepnum { background: var(--danger); color: var(--surface); }
+  .mm-round { border: 2px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; background: var(--surface); transition: background-color 250ms ease, border-color 250ms ease; }
+  .mm-round.is-best { border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+  .mm-round.is-full { background: var(--highlighter); }
+  .mm-notes { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+  .mm-notes.dropped { color: var(--muted-foreground); }
+  .mm-notebox { flex: 1; min-width: 0; font: 400 15px/1.4 var(--ff-text), sans-serif; padding: 8px 10px; border: 2px solid var(--ink); border-radius: 8px; background: var(--surface); color: var(--foreground); resize: vertical; }
+  .mm-markbox.small { width: 48px; font-size: 18px; padding: 4px 2px; box-shadow: 2px 2px 0 var(--danger); }
+  .mm-tile.unseen.marked { background: var(--success); color: var(--surface); border-color: var(--ink); }
+  @media (prefers-reduced-motion: reduce) { .mm-round { transition: none; } }
+
   /* the workspace grid: question → steps → answers → approve → proof on phones */
   .mm-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr) 320px; grid-template-areas: "steps q side" "steps answers side"; gap: 28px; align-items: start; }
   .mm-a-q { grid-area: q; } .mm-a-steps { grid-area: steps; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; } .mm-a-answers { grid-area: answers; } .mm-a-side { grid-area: side; position: sticky; top: 16px; }

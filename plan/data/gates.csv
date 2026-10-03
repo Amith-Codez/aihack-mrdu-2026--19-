@@ -3,7 +3,7 @@ H0 Hacking starts,2026-10-03 11:30,The list is in inputs/problem-statements; P1 
 G1 Problem approved,2026-10-03 12:30,02 decision APPROVED,DONE,The recommendation stands 10 minutes after the decision is shown
 G2 Plan READY,2026-10-03 17:15,06 is READY and scope freeze 1 is written,DONE,Cut P4 to palette plus one screen; keep the P5 defaults
 G3 Skeleton live,2026-10-03 18:00,/app opens on the live URL in our design,DONE,Skip styling and start step 1
-G4 Hero path on the mock,2026-10-03 20:15,The run streams on the live URL; the planned sad path works; one real run done,,SHRINK ladder steps 3-4
+G4 Hero path on the mock,2026-10-03 20:15,The run streams on the live URL; the planned sad path works; one real run done,DONE,SHRINK ladder steps 3-4
 G5 MVP real mechanism,2026-10-03 22:30,3 clean hero runs on the live URL with the real model and real checks,,SHRINK ladder steps 3-5; no extras tonight
 G6 Round-1 freeze,2026-10-03 23:15,AUDIT done; tag pushed; backup video recorded; round-1 kit ready,,Show the replay and say what is live and what is recorded
 R1 Jury round 1,2026-10-04 00:00,Pitched; every word of the feedback written down,,Pitch what is DONE-TESTED; never skip the round

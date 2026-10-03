@@ -1,24 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { SIX_IDS, SOURCE_LINE, UNSEEN_IDS, sampleClass } from "@/lib/demo/sample";
+import { useRef, useState, type ReactNode } from "react";
+import { SIX_IDS, SOURCE_LINE, UNSEEN_IDS, heroRequest, sampleClass } from "@/lib/demo/sample";
 import { defaultFlags } from "@/lib/flags";
-import type { Role } from "@/lib/types";
+import { keptRound, project, readNdjson, type View } from "@/lib/project";
+import { RunEvent, type AnswerMark, type Role } from "@/lib/types";
 import { Hero } from "./hero";
 import { CountUp, PenCircle, Reveal } from "./pen";
 
-type RailStep = { id: string; role: Role; label: string; note: string };
+type RailStep = { id: string; role: Role; label: string; note: string; match?: boolean };
 
-// The named steps of the hero run (06 §7). Status comes from real events from step 1 on.
+// The named steps of the hero run (06 §7). Status comes from the real events.
 const RAIL: RailStep[] = [
   { id: "split", role: "CODE", label: "Split the class", note: "your six + 10 unseen to test on" },
   { id: "six", role: "HUMAN", label: "You mark six answers", note: "" },
-  { id: "match", role: "AGENT", label: "Match my marking", note: "rewrites its notes, at most 2 rounds, keeps a round only if it matches you more" },
-  { id: "approve-scheme", role: "HUMAN", label: "You approve the scheme", note: "nothing is marked with it before" },
+  { id: "match", role: "AGENT", label: "Match my marking", note: "rewrites its notes, at most 2 rounds, keeps a round only if it matches you more", match: true },
+  { id: "approve-scheme", role: "HUMAN", label: "You approve the scheme", note: "nothing is marked with it before", match: true },
   { id: "mark", role: "MODEL", label: "Mark the unseen answers", note: "5 answers per call, a quote for every mark" },
   { id: "checks", role: "CODE", label: "Hard checks", note: "quote is really in the answer · marks add up" },
-  { id: "approve", role: "HUMAN", label: "You approve the class", note: "edit any mark first" },
+  { id: "agreement", role: "CODE", label: "Compare with your real marks", note: "on the 10 it had not seen" },
+  { id: "approve", role: "HUMAN", label: "You approve the marks", note: "edit any mark first" },
 ];
 
 const LEGEND = [
@@ -29,21 +31,143 @@ const LEGEND = [
 ];
 
 type Filter = "all" | "six" | "unseen";
+type Phase = "idle" | "tuning" | "approve-scheme" | "marking" | "review" | "approved" | "error";
+
+const parseEvent = (x: unknown) => {
+  const r = RunEvent.safeParse(x);
+  return r.success ? r.data : null;
+};
+
+/** Highlight each quote inside the answer text (case-insensitive; a quote that is not found is simply not marked). */
+function withQuotes(text: string, quotes: string[]): ReactNode {
+  const spans: [number, number][] = [];
+  const low = text.toLowerCase();
+  for (const q of quotes) {
+    const i = q.trim() ? low.indexOf(q.trim().toLowerCase()) : -1;
+    if (i >= 0 && !spans.some(([a, b]) => i < b && i + q.trim().length > a)) spans.push([i, i + q.trim().length]);
+  }
+  if (!spans.length) return text;
+  spans.sort((a, b) => a[0] - b[0]);
+  const out: ReactNode[] = [];
+  let at = 0;
+  spans.forEach(([a, b], k) => {
+    if (a > at) out.push(text.slice(at, a));
+    out.push(
+      <mark key={k} className="mm-q">
+        {text.slice(a, b)}
+      </mark>,
+    );
+    at = b;
+  });
+  if (at < text.length) out.push(text.slice(at));
+  return out;
+}
 
 export function MarkApp() {
   const max = sampleClass.maxMarks;
+  const flags = defaultFlags;
   const [six, setSix] = useState<Record<string, string>>(() =>
     Object.fromEntries(SIX_IDS.map((id) => [id, String(sampleClass.answers.find((a) => a.id === id)!.grader1)])),
   );
   const [filter, setFilter] = useState<Filter>("all");
-  const flags = defaultFlags;
+  const [events, setEvents] = useState<RunEvent[]>([]);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [breakIt, setBreakIt] = useState(true);
+  const [notesDraft, setNotesDraft] = useState<string[]>([]);
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const abort = useRef<AbortController | null>(null);
 
   const valid = (v: string | undefined) => v !== undefined && v !== "" && Number(v) >= 0 && Number(v) <= max;
   const filled = SIX_IDS.filter((id) => valid(six[id])).length;
   const sixDone = filled === SIX_IDS.length;
+  const busy = phase === "tuning" || phase === "marking";
+
+  const v: View = project(events);
+  const kept = keptRound(v);
+  const sixMarks = kept ? v.six[kept.n] ?? {} : {};
+  const tuned = Object.keys(v.after).length > 0;
+  const finalMarks = tuned ? v.after : v.before;
+  const finalPhase = tuned ? "after" : "before";
+  const showReal = v.agreement.before !== undefined;
 
   const kind = (id: string) => (SIX_IDS.includes(id) ? "yours" : UNSEEN_IDS.includes(id) ? "unseen" : "rest");
   const shown = sampleClass.answers.filter((a) => filter === "all" || kind(a.id) === (filter === "six" ? "yours" : "unseen"));
+
+  async function runStage(stage: "tune" | "mark", notes: string[]) {
+    abort.current?.abort();
+    const ctl = new AbortController();
+    abort.current = ctl;
+    const teacherMarks = SIX_IDS.map((id) => ({ answerId: id, mark: Number(six[id]) }));
+    const body = heroRequest({ stage, breakIt, notes, teacherMarks, matchEnabled: flags.match });
+    let sawScheme = false;
+    let sawError = false;
+    try {
+      const res = await fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctl.signal });
+      if (!res.ok || !res.body) throw new Error(`The server answered ${res.status}`);
+      await readNdjson(
+        res,
+        (e) => {
+          if (e.type === "scheme") {
+            sawScheme = true;
+            setNotesDraft(e.notes);
+          }
+          if (e.type === "error") sawError = true;
+          setEvents((prev) => [...prev, e]);
+        },
+        parseEvent,
+      );
+    } catch (err) {
+      if (ctl.signal.aborted) return;
+      sawError = true;
+      setEvents((prev) => [...prev, { type: "error", message: (err as Error).message || "The run failed", canReplay: true }]);
+    }
+    if (sawError) setPhase("error");
+    else if (stage === "tune") setPhase(sawScheme ? "approve-scheme" : "error");
+    else setPhase("review");
+  }
+
+  function start() {
+    setEvents([]);
+    setEdits({});
+    setNotesDraft([]);
+    if (flags.match) {
+      setPhase("tuning");
+      void runStage("tune", []);
+    } else {
+      setPhase("marking");
+      void runStage("mark", []);
+    }
+  }
+
+  function approveScheme() {
+    setPhase("marking");
+    setEvents((prev) => [...prev, { type: "step", id: "approve-scheme", role: "HUMAN", label: "You approved the scheme", status: "done" }]);
+    void runStage("mark", notesDraft.map((n) => n.trim().slice(0, 200)).filter(Boolean).slice(0, 6));
+  }
+
+  function approveMarks() {
+    setPhase("approved");
+    setEvents((prev) => [...prev, { type: "step", id: "approve", role: "HUMAN", label: "You approved the marks", status: "done" }]);
+  }
+
+  function reset() {
+    abort.current?.abort();
+    setEvents([]);
+    setEdits({});
+    setNotesDraft([]);
+    setPhase("idle");
+  }
+
+  const stepStatus = (id: string) => {
+    if (id === "six") return sixDone ? "done" : "waiting";
+    return v.steps[id]?.status ?? "waiting";
+  };
+  const editedCount = Object.entries(edits).filter(([id, val]) => finalMarks[id] && val !== "" && Number(val) !== finalMarks[id].total).length;
+  const usage = v.usage.reduce(
+    (s, u) => ({ calls: s.calls + u.calls, tokens: s.tokens + u.inputTokens + u.outputTokens, seconds: s.seconds + u.seconds, fallback: s.fallback || u.usedFallback, model: u.model }),
+    { calls: 0, tokens: 0, seconds: 0, fallback: false, model: "" },
+  );
+  const planted = v.rejected.find((r) => r.planted);
 
   return (
     <main className="mm-wrap">
@@ -73,9 +197,7 @@ export function MarkApp() {
         {/* QUESTION */}
         <section className="mm-a-q mm-card blue" aria-labelledby="q-h">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="mm-mono mm-small mm-muted">
-              SAMPLE CLASS · DATA STRUCTURES · QUESTION 7 · {max} MARKS
-            </div>
+            <div className="mm-mono mm-small mm-muted">SAMPLE CLASS · DATA STRUCTURES · QUESTION 7 · {max} MARKS</div>
             <span className="mm-tag" style={{ color: "var(--primary)" }}>
               {sampleClass.answers.length} ANSWERS
             </span>
@@ -88,7 +210,9 @@ export function MarkApp() {
             <ul className="m-0 mt-1 list-none p-0">
               {sampleClass.scheme.map((c) => (
                 <li key={c.id} className="flex items-baseline justify-between gap-3 py-0.5">
-                  <span>{c.text}</span>
+                  <span>
+                    <span className="mm-mono mm-small mm-muted">{c.id}</span> {c.text}
+                  </span>
                   <span className="mm-mono">{c.points}</span>
                 </li>
               ))}
@@ -111,7 +235,7 @@ export function MarkApp() {
                   <span
                     key={a.id}
                     title={`${a.label}${k === "yours" ? " · you mark this" : k === "unseen" ? " · unseen, used to test it" : ""}`}
-                    className={`mm-tile ${k}${k === "yours" && valid(six[a.id]) ? " filled" : ""}`}
+                    className={`mm-tile ${k}${k === "yours" && valid(six[a.id]) ? " filled" : ""}${finalMarks[a.id] ? " marked" : ""}`}
                   >
                     {String(n + 1).padStart(2, "0")}
                   </span>
@@ -121,37 +245,46 @@ export function MarkApp() {
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              className="mm-btn"
-              disabled
-              title={flags.match ? "The run engine is connected in build step 1" : "Match my marking is switched off"}
-            >
-              {flags.match ? "Match my marking" : "Mark the class"}
+            <button type="button" className="mm-btn" disabled={!sixDone || busy} onClick={start} aria-busy={busy}>
+              {busy ? "Running…" : phase === "idle" ? (flags.match ? "Match my marking" : "Mark the class") : "Run again"}
             </button>
-            <span className="mm-small mm-muted max-w-[36ch]">
-              {sixDone
-                ? "Your six marks are in. The marking run is being connected."
-                : `Enter ${6 - filled} more of your marks to start.`}
-            </span>
+            <label className="mm-toggle">
+              <input type="checkbox" checked={breakIt} disabled={busy} onChange={(e) => setBreakIt(e.target.checked)} />
+              <span>
+                <b>Break it:</b> plant a false quote
+              </span>
+            </label>
+            {phase !== "idle" && !busy && (
+              <button type="button" className="mm-linkbtn" onClick={reset}>
+                Start again
+              </button>
+            )}
           </div>
+          <p className="mm-small mm-muted mt-2 mb-0 max-w-[60ch]">
+            {!sixDone
+              ? `Enter ${6 - filled} more of your marks to start.`
+              : breakIt
+                ? "Break it swaps one quote the model returns for a line that is not in the answer, so you can watch the check throw it out."
+                : "Your six marks are in."}
+          </p>
         </section>
 
         {/* STEPS rail */}
-        <section className="mm-a-steps mm-card" aria-labelledby="steps-h">
+        <section className="mm-a-steps mm-card" aria-labelledby="steps-h" aria-live="polite">
           <div className="mm-section-h">
             <h2 id="steps-h" className="text-[26px]">
               How it marks
             </h2>
-            <span className="mm-mono mm-small mm-muted">7 STEPS</span>
+            <span className="mm-mono mm-small mm-muted">{RAIL.filter((s) => flags.match || !s.match).length} STEPS</span>
           </div>
           <ol className="m-0 mt-1 list-none p-0">
-            {RAIL.map((s, n) => {
-              const done = s.id === "six" && sixDone;
+            {RAIL.filter((s) => flags.match || !s.match).map((s, n) => {
+              const st = stepStatus(s.id);
+              const live = v.steps[s.id]?.label;
               return (
-                <li key={s.id} className={`mm-step${done ? " is-done" : ""}${s.role === "AGENT" ? " is-agent" : ""}`}>
-                  <span className="mm-stepnum" aria-label={done ? "done" : "waiting"} title={done ? "done" : "waiting"}>
-                    {done ? "✓" : n + 1}
+                <li key={s.id} className={`mm-step is-${st}${s.role === "AGENT" ? " is-agent" : ""}`}>
+                  <span className="mm-stepnum" aria-label={st} title={st}>
+                    {st === "done" ? "✓" : st === "failed" ? "✗" : n + 1}
                   </span>
                   <span>
                     <span className="flex flex-wrap items-center gap-2">
@@ -159,7 +292,19 @@ export function MarkApp() {
                       <span className={`mm-badge ${s.role}`}>{s.role}</span>
                     </span>
                     <span className="mm-small mm-muted block">
-                      {s.id === "six" ? (done ? <span className="mm-ok">✓ done · 6 of 6 entered</span> : `${filled} of 6 entered · waiting`) : s.note}
+                      {s.id === "six" ? (
+                        sixDone ? (
+                          <span className="mm-ok">✓ done · 6 of 6 entered</span>
+                        ) : (
+                          `${filled} of 6 entered · waiting`
+                        )
+                      ) : st === "running" ? (
+                        <span className="mm-running">● {live ?? "working"}</span>
+                      ) : st === "done" && live ? (
+                        <span className="mm-ok">✓ {live}</span>
+                      ) : (
+                        s.note
+                      )}
                     </span>
                   </span>
                 </li>
@@ -179,8 +324,123 @@ export function MarkApp() {
           </div>
         </section>
 
-        {/* ANSWERS */}
+        {/* ANSWERS (+ the run's cards on top) */}
         <section className="mm-a-answers" aria-labelledby="ans-h">
+          {v.error && (
+            <div className="mm-card red mb-6" role="alert">
+              <h2 className="text-[26px]">The run stopped</h2>
+              <p className="mt-1 mb-3">{v.error}</p>
+              <p className="mm-small mm-muted mt-0 mb-3">Both model providers were tried. Nothing was marked with an unchecked mark.</p>
+              <button type="button" className="mm-btn ghost" onClick={start} disabled={!sixDone}>
+                Try again
+              </button>
+            </div>
+          )}
+
+          {flags.match && (v.rounds.length > 0 || phase === "tuning") && (
+            <div className="mm-card blue mb-6" aria-live="polite">
+              <div className="mm-section-h">
+                <h2 className="text-[26px]">Match my marking</h2>
+                <span className="mm-badge AGENT">AGENT</span>
+              </div>
+              <p className="mm-small mm-muted mt-1 mb-3">It marks your six, compares with your marks, rewrites its notes and tries again. Code keeps a round only if it matches you more.</p>
+              <ol className="m-0 flex list-none flex-col gap-3 p-0">
+                {v.rounds.map((r) => {
+                  const best = kept?.n === r.n;
+                  const full = r.matches === r.of;
+                  return (
+                    <li key={r.n} className={`mm-round${best ? " is-best" : ""}${best && full ? " is-full" : ""}`}>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="mm-mono mm-small">{r.n === 0 ? "ROUND 0 · YOUR SCHEME AS TYPED" : `ROUND ${r.n} · NEW NOTES`}</span>
+                        <span className={`mm-tag ${r.kept ? "mm-ok" : "mm-bad"}`}>{r.kept ? "✓ KEPT" : "✗ NOT KEPT · no better"}</span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-baseline gap-x-3">
+                        <span>matches you on</span>
+                        <span className="mm-num text-[34px]">
+                          {r.matches} of {r.of}
+                        </span>
+                        <span className="mm-small mm-muted">total gap {r.gap}</span>
+                        {best && full && <span className="mm-pen text-[24px]">matches you now!</span>}
+                      </div>
+                      {r.notes.length > 0 && (
+                        <ul className="mm-notes">
+                          {r.notes.map((n, i) => (
+                            <li key={i}>{n}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {r.dropped.length > 0 && (
+                        <ul className="mm-notes dropped">
+                          {r.dropped.map((n, i) => (
+                            <li key={i}>
+                              <s>{n}</s> <span className="mm-bad mm-small">✗ dropped by code: copies an answer or gives more than a criterion is worth</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+                {phase === "tuning" && <li className="mm-small mm-running">● {v.steps.match?.label ?? "marking your six"}</li>}
+              </ol>
+
+              {v.scheme && (
+                <div className="mt-4 rounded-[10px] border-2 border-dashed border-danger bg-surface p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <b>Your call: the scheme notes</b>
+                    <span className="mm-badge HUMAN">HUMAN</span>
+                  </div>
+                  {phase === "approve-scheme" ? (
+                    <>
+                      <p className="mm-small mm-muted mt-1 mb-2">
+                        {notesDraft.length
+                          ? "Edit or delete any note. Nothing is marked with them until you approve."
+                          : "No round matched you better, so your scheme is used as typed."}
+                      </p>
+                      {notesDraft.map((n, i) => (
+                        <div key={i} className="mb-2 flex items-start gap-2">
+                          <textarea
+                            className="mm-notebox"
+                            value={n}
+                            maxLength={200}
+                            rows={2}
+                            aria-label={`Scheme note ${i + 1}`}
+                            onChange={(e) => setNotesDraft((d) => d.map((x, j) => (j === i ? e.target.value : x)))}
+                          />
+                          <button type="button" className="mm-linkbtn" onClick={() => setNotesDraft((d) => d.filter((_, j) => j !== i))} aria-label={`Delete note ${i + 1}`}>
+                            delete
+                          </button>
+                        </div>
+                      ))}
+                      <button type="button" className="mm-btn mt-1" onClick={approveScheme}>
+                        Approve and mark the 10 unseen
+                      </button>
+                    </>
+                  ) : (
+                    <p className="mm-small mt-1 mb-0">
+                      <span className="mm-ok">✓ Approved</span>
+                      {notesDraft.length ? ` · ${notesDraft.length} note${notesDraft.length > 1 ? "s" : ""} in use` : " · scheme as typed"}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {planted && (
+            <div className="mm-card red mb-6">
+              <span className="mm-stamp">THROWN OUT</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <b>Break it worked: the check caught the planted quote</b>
+                <span className="mm-badge CODE">CODE</span>
+              </div>
+              <p className="mm-small mt-1 mb-0">
+                {sampleClass.answers.find((a) => a.id === planted.answerId)?.label}: <s>“{planted.quote}”</s> is not in the answer → mark thrown out → re-asked once
+                {finalMarks[planted.answerId] ? <span className="mm-ok"> → ✓ fixed on try 2</span> : <span className="mm-bad"> → sent to you unmarked</span>}
+              </p>
+            </div>
+          )}
+
           <div className="mm-section-h mb-4">
             <h2 id="ans-h" className="text-[26px]">
               The answers
@@ -203,9 +463,16 @@ export function MarkApp() {
             {shown.map((a) => {
               const k = kind(a.id);
               const bad = k === "yours" && six[a.id] !== "" && !valid(six[a.id]);
+              const tool: AnswerMark | undefined = k === "yours" ? sixMarks[a.id] : finalMarks[a.id];
+              const rej = v.rejected.filter((r) => r.answerId === a.id && (k === "yours" ? r.phase === "six" : r.phase === finalPhase));
+              const thrown = k === "unseen" && !tool && rej.some((r) => r.final);
+              const edit = edits[a.id];
+              const edited = tool && edit !== undefined && edit !== "" && Number(edit) !== tool.total;
               return (
                 <li key={a.id} className={`mm-card ${k}`}>
                   {k === "yours" && <span className="mm-stamp yellow">YOU MARK THIS</span>}
+                  {k === "unseen" && tool && <span className="mm-stamp green">{phase === "approved" ? "APPROVED" : "CHECKED ✓"}</span>}
+                  {thrown && <span className="mm-stamp">THROWN OUT · TO YOU</span>}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
@@ -215,22 +482,81 @@ export function MarkApp() {
                             UNSEEN · TESTS THE TOOL
                           </span>
                         )}
+                        {k === "rest" && events.length > 0 && <span className="mm-tag mm-muted">NOT IN THIS RUN</span>}
                       </div>
-                      <p className="mt-1.5 mb-0 text-[21px] break-words">{a.text}</p>
+                      <p className="mt-1.5 mb-0 text-[21px] break-words">{tool ? withQuotes(a.text, tool.criteria.map((c) => c.quote)) : a.text}</p>
+                      {tool && (
+                        <ul className="mm-crit">
+                          {tool.criteria.map((c) => {
+                            const crit = sampleClass.scheme.find((s) => s.id === c.criterionId);
+                            return (
+                              <li key={c.criterionId}>
+                                <span className="mm-mono">
+                                  {c.criterionId} {c.awarded}/{crit?.points}
+                                </span>{" "}
+                                {c.awarded > 0 ? <span className="mm-small">“{c.quote}”</span> : <span className="mm-small mm-muted">not met</span>}
+                              </li>
+                            );
+                          })}
+                          <li className="mm-small">
+                            <span className="mm-ok">✓ quote in answer</span> · <span className="mm-ok">✓ marks add up</span>
+                            {tool.attempt > 1 && <span className="mm-bad"> · try {tool.attempt}</span>}
+                          </li>
+                        </ul>
+                      )}
+                      {rej.map((r, i) => (
+                        <p key={i} className="mm-small mm-bad mt-2 mb-0">
+                          ✗ Try {r.attempt} thrown out{r.planted ? " (planted by Break it)" : ""}: {r.reason}
+                        </p>
+                      ))}
                     </div>
                     {k === "yours" && (
-                      <label className="flex shrink-0 flex-row items-center gap-2 self-end sm:flex-col sm:gap-1">
-                        <span className="mm-pen text-[22px] leading-none">your mark</span>
-                        <input
-                          className="mm-markbox"
-                          inputMode="numeric"
-                          aria-invalid={bad}
-                          aria-label={`Your mark for ${a.label}, out of ${max}`}
-                          value={six[a.id]}
-                          onChange={(e) => setSix((m) => ({ ...m, [a.id]: e.target.value.replace(/[^0-9]/g, "").slice(0, 1) }))}
-                        />
-                        <span className={`mm-mono mm-small ${bad ? "mm-bad" : "mm-muted"}`}>{bad ? `✗ max ${max}` : `/ ${max}`}</span>
-                      </label>
+                      <div className="flex shrink-0 flex-row items-end gap-4 self-end sm:flex-col sm:items-center sm:gap-2">
+                        <label className="flex flex-row items-center gap-2 sm:flex-col sm:gap-1">
+                          <span className="mm-pen text-[22px] leading-none">your mark</span>
+                          <input
+                            className="mm-markbox"
+                            inputMode="numeric"
+                            aria-invalid={bad}
+                            disabled={busy}
+                            aria-label={`Your mark for ${a.label}, out of ${max}`}
+                            value={six[a.id]}
+                            onChange={(e) => setSix((m) => ({ ...m, [a.id]: e.target.value.replace(/[^0-9]/g, "").slice(0, 1) }))}
+                          />
+                          <span className={`mm-mono mm-small ${bad ? "mm-bad" : "mm-muted"}`}>{bad ? `✗ max ${max}` : `/ ${max}`}</span>
+                        </label>
+                        {tool && (
+                          <span className="mm-small text-center">
+                            tool: <b className="mm-mono">{tool.total}</b>{" "}
+                            {tool.total === Number(six[a.id]) ? <span className="mm-ok">✓ same</span> : <span className="mm-bad">✗ differs</span>}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {k === "unseen" && tool && (
+                      <div className="flex shrink-0 flex-row items-end gap-4 self-end sm:flex-col sm:items-center sm:gap-2">
+                        <span className="mm-bigmark" aria-label={`Tool's mark ${tool.total} of ${max}`}>
+                          {edited ? edit : tool.total}
+                        </span>
+                        {phase === "review" ? (
+                          <label className="flex items-center gap-1">
+                            <span className="mm-small">edit</span>
+                            <input
+                              className="mm-markbox small"
+                              inputMode="numeric"
+                              aria-label={`Change the mark for ${a.label}`}
+                              value={edit ?? String(tool.total)}
+                              onChange={(e) => setEdits((m) => ({ ...m, [a.id]: e.target.value.replace(/[^0-9]/g, "").slice(0, 1) }))}
+                            />
+                          </label>
+                        ) : null}
+                        {edited && <span className="mm-tag mm-bad">EDITED BY YOU</span>}
+                        {showReal && (
+                          <span className="mm-small mm-muted text-center">
+                            real mark {sampleClass.answers.find((x) => x.id === a.id)!.grader1}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </li>
@@ -242,17 +568,78 @@ export function MarkApp() {
         {/* APPROVE + PROOF */}
         <aside className="mm-a-side flex flex-col gap-6">
           <div className="mm-card red">
-            <h2 className="text-[26px]">Your call</h2>
-            <p className="mm-small mt-1.5 mb-3.5">
-              <b>Nothing is final until you approve.</b> <span className="mm-muted">No marks yet: run the marking first.</span>
-            </p>
-            <button type="button" className="mm-btn" disabled>
-              Approve marks
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-[26px]">Your call</h2>
+              <span className="mm-badge HUMAN">HUMAN</span>
+            </div>
+            {phase === "approved" ? (
+              <p className="mt-1.5 mb-0">
+                <span className="mm-ok">✓ Marks approved</span>
+                {editedCount ? ` · ${editedCount} changed by you` : ""}. They stay in this tab; nothing is stored.
+              </p>
+            ) : (
+              <>
+                <p className="mm-small mt-1.5 mb-3.5">
+                  <b>Nothing is final until you approve.</b>{" "}
+                  <span className="mm-muted">
+                    {phase === "review"
+                      ? `${Object.keys(finalMarks).length} marks ready. Change any mark in its card first.`
+                      : phase === "approve-scheme"
+                        ? "First approve the scheme notes."
+                        : busy
+                          ? "The run is going."
+                          : "No marks yet: run the marking first."}
+                  </span>
+                </p>
+                <button type="button" className="mm-btn" disabled={phase !== "review"} onClick={approveMarks}>
+                  Approve marks{editedCount ? ` (${editedCount} edited)` : ""}
+                </button>
+              </>
+            )}
           </div>
           <Reveal className="mm-card">
             <h2 className="text-[26px]">Proof</h2>
-            <p className="mm-small mm-muted mt-1 mb-3">How often two trained examiners agree, on 2,442 real answers:</p>
+            <div className="mt-2 rounded-[10px] border-2 border-dashed border-primary bg-surface-2 p-3">
+              <div className="mm-small">
+                <b>This tool vs you</b>, same mark on 10 answers it had not seen
+              </div>
+              {v.agreement.before ? (
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+                  {v.agreement.after ? (
+                    <>
+                      <span className="mm-small">before</span>
+                      <span className="mm-num text-[34px]">{v.agreement.before.exact}</span>
+                      <span className="mm-small">→ after</span>
+                      <span className="mm-num text-[34px]" style={{ color: "var(--primary)" }}>
+                        {v.agreement.after.exact}
+                      </span>
+                      <span className="mm-small">of {v.agreement.after.n}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="mm-num text-[34px]" style={{ color: "var(--primary)" }}>
+                        {v.agreement.before.exact}
+                      </span>
+                      <span className="mm-small">of {v.agreement.before.n} · scheme as typed</span>
+                    </>
+                  )}
+                  <div className="mm-small mm-muted w-full">
+                    within one mark: {(v.agreement.after ?? v.agreement.before).withinOne} of {(v.agreement.after ?? v.agreement.before).n} · one question, this run
+                  </div>
+                </div>
+              ) : (
+                <div className="mm-mono mm-small mt-1" style={{ color: "var(--primary)" }}>
+                  {busy ? "measuring…" : "measured when you run it"}
+                </div>
+              )}
+            </div>
+            {usage.calls > 0 && (
+              <div className="mm-mono mm-small mt-3">
+                {usage.seconds.toFixed(1)} s · {usage.calls} model calls · {usage.tokens.toLocaleString("en-IN")} tokens · {usage.model}
+                {usage.fallback ? " · fallback used" : ""} · ₹0 (free tier)
+              </div>
+            )}
+            <p className="mm-small mm-muted mt-4 mb-2">How often two trained examiners agree, on 2,442 real answers:</p>
             <div className="flex items-baseline justify-between">
               <span className="mm-small">same mark</span>
               <span className="mm-num text-[34px]">
@@ -270,14 +657,6 @@ export function MarkApp() {
             </div>
             <div className="mm-bar-track mt-1">
               <div className="mm-bar-fill" style={{ width: "78%", background: "var(--muted-foreground)" }} />
-            </div>
-            <div className="mt-4 rounded-[10px] border-2 border-dashed border-primary bg-surface-2 p-3">
-              <div className="mm-small">
-                <b>This tool vs you</b>, on 10 answers it has not seen
-              </div>
-              <div className="mm-mono mm-small mt-1" style={{ color: "var(--primary)" }}>
-                before → after: measured on the first run
-              </div>
             </div>
             <div className="mm-small mm-muted mt-3">Mohler dataset · measured by us, 3 Oct 2026</div>
           </Reveal>

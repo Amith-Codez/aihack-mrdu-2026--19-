@@ -26,6 +26,10 @@ export const RunRequest = z.object({
   heldOutMarks: z.array(TeacherMark).optional(),
   breakIt: z.boolean(),
   matchEnabled: z.boolean(),
+  // The run is two requests because the teacher approves the scheme in between (06 §13 step 7):
+  // "tune" = split, mark her six, Match my marking · "mark" = mark the unseen with the approved notes.
+  stage: z.enum(["tune", "mark"]),
+  notes: z.array(z.string().max(200)).max(6).default([]),
 });
 
 // ── NDJSON events, one per line ──
@@ -35,9 +39,11 @@ export const Phase = z.enum(["six", "before", "after"]);
 
 export const RunEvent = z.discriminatedUnion("type", [
   z.object({ type: z.literal("step"), id: z.string(), role: Role, label: z.string(), status: StepStatus }),
-  z.object({ type: z.literal("round"), n: z.number().int(), matches: z.number().int(), of: z.number().int(), notes: z.array(z.string()), kept: z.boolean() }),
-  z.object({ type: z.literal("mark"), phase: Phase, mark: AnswerMark }),
-  z.object({ type: z.literal("rejected"), answerId: z.string(), quote: z.string(), reason: z.string(), attempt: z.number().int() }),
+  z.object({ type: z.literal("round"), n: z.number().int(), matches: z.number().int(), of: z.number().int(), gap: z.number(), notes: z.array(z.string()), dropped: z.array(z.string()).default([]), kept: z.boolean() }),
+  z.object({ type: z.literal("mark"), phase: Phase, round: z.number().int().optional(), mark: AnswerMark }),
+  // End of the "tune" stage: the notes the teacher is asked to approve (HUMAN step).
+  z.object({ type: z.literal("scheme"), notes: z.array(z.string()), matches: z.number().int(), of: z.number().int() }),
+  z.object({ type: z.literal("rejected"), phase: Phase, answerId: z.string(), quote: z.string(), reason: z.string(), attempt: z.number().int(), final: z.boolean(), planted: z.boolean() }),
   z.object({ type: z.literal("agreement"), phase: Phase, exact: z.number().int(), withinOne: z.number().int(), n: z.number().int() }),
   z.object({ type: z.literal("usage"), calls: z.number().int(), inputTokens: z.number().int(), outputTokens: z.number().int(), seconds: z.number(), model: z.string(), usedFallback: z.boolean() }),
   z.object({ type: z.literal("error"), message: z.string(), canReplay: z.boolean() }),

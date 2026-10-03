@@ -39,3 +39,25 @@ export const teacherSix: TeacherMark[] = SIX_IDS.map((id) => ({
   answerId: id,
   mark: sampleClass.answers.find((a) => a.id === id)!.grader1,
 }));
+
+export const heldOut: TeacherMark[] = UNSEEN_IDS.map((id) => ({
+  answerId: id,
+  mark: sampleClass.answers.find((a) => a.id === id)!.grader1,
+}));
+
+/** The request for the hero case: her six + the 10 unseen (their real marks are held back for the agreement step). */
+export function heroRequest(o: { stage: "tune" | "mark"; breakIt: boolean; notes?: string[]; teacherMarks?: TeacherMark[]; matchEnabled?: boolean }) {
+  const ids = [...SIX_IDS, ...UNSEEN_IDS];
+  return {
+    question: sampleClass.question,
+    maxMarks: sampleClass.maxMarks,
+    scheme: sampleClass.scheme,
+    answers: sampleClass.answers.filter((a) => ids.includes(a.id)).map(({ id, text }) => ({ id, text })),
+    teacherMarks: o.teacherMarks ?? teacherSix,
+    heldOutMarks: heldOut,
+    breakIt: o.breakIt,
+    matchEnabled: o.matchEnabled ?? true,
+    stage: o.stage,
+    notes: o.notes ?? [],
+  };
+}

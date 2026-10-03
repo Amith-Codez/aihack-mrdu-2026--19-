@@ -4,13 +4,13 @@
 > Status only: details live in files 01–09. It should be readable in 30 seconds.
 > **Two engines:** 🧠 **COWORK** plans (files 01–06, 08, and the `design/`, `assets/`, `pitch/` folders) · 🛠 **CLAUDE CODE** builds (the app in `web/`, files 07 and 09).
 
-**Last updated:** 3 Oct 2026 19:20 · **by:** B1 build step 0 (Claude Code)
+**Last updated:** 3 Oct 2026 19:55 · **by:** B2 build step 1 (Claude Code)
 
 ## 1. WHERE WE ARE NOW
 - **Engine to use now:** 🛠 CLAUDE CODE
-- **Step:** build step 0 DONE-TESTED (G3 done 18:41, 41 min late; clock ON TRACK for G4 20:15). "PLAN PUSHED" said; laptop B starts PITCH-1
-- **Next action (one):** `/clear`, then paste **B2** for build step 1 (key test in the first 10 minutes → types/engine/`/api/run` on the mock → Break it → one real run)
-- **Blocker:** none. Keys are in `web/.env.local` and on Vercel (production) but **not yet tested** (step 1 does it). Open questions on the plan (asked in chat 18:45): what the 10 answers that are neither "six" nor "unseen" do; how the mid-run "approve the scheme" fits one `POST /api/run`
+- **Step:** build step 1 DONE-TESTED (G4 done 19:50, 25 min early). The hero path streams on the live URL with the real model; Break it is caught and fixed; the fallback took over live once
+- **Next action (one):** `/clear`, then paste **B2** for build step 2 (MVP). First job: make Match my marking actually raise matches on the real model before the **21:15 checkpoint** (today it stays at 4 of 6)
+- **Blocker:** none. Risk: Gemini's free quota runs out after ~2 runs in a few minutes (Groq then carries the run); the recorded replays in step 2 are essential
 
 ## 2. Event
 | | |
@@ -46,7 +46,7 @@
 | 6 | Look of the hero screen | 🧠 COWORK | P4 | 05, `design/` | ✋ look | DONE · GO 3 Oct 15:22 |
 | 7 | Architecture · stack · gates (stages 17–19) | 🧠 COWORK | P5 | 06, `plan/data/gates.csv` | ✋ plan → 🛑 **MOVE TO CLAUDE CODE** | DONE · READY 3 Oct |
 | 8 | Evidence + pitch lane: eval cases, claims ledger, story, Q&A, deck | 🧠 COWORK (laptop B) | PITCH-1 · PITCH-2 | 08, `pitch/`, `plan/data/` | — | NOT STARTED |
-| 9 | Build · test · debug (stages 20–22): steps 0–2 = MVP | 🛠 CLAUDE CODE | B1 · B2 | `web/` | — | PARTIAL · step 0 DONE-TESTED 18:41 |
+| 9 | Build · test · debug (stages 20–22): steps 0–2 = MVP | 🛠 CLAUDE CODE | B1 · B2 | `web/` | — | PARTIAL · step 0 DONE-TESTED 18:41 · step 1 DONE-TESTED 19:50 |
 | 10 | Readiness audit 1 + jury round 1 (00:00) | either | AUDIT · ROUND-1 · ROUND | 09 §9, `plan/data/rounds.md` | — | NOT STARTED |
 | 11 | Top 3 + jury suggestion · polish | 🛠 CLAUDE CODE | B2 · B3 | `web/` | — | NOT STARTED |
 | 12 | Demo + capture (stage 23) | 🛠 CLAUDE CODE | B4 | 07, `pitch/` | — | NOT STARTED |
@@ -60,7 +60,7 @@
 | G2 Plan READY → switch (scope freeze 1) | **17:15** (was 14:45) | 06 READY; B1 says "PLAN PUSHED" and laptop B starts PITCH-1 | — |
 | G3 Skeleton live | 18:00 (was 15:45) | `/app` opens in our design on the live URL | DONE 18:41 |
 | Evidence pack pushed (laptop B) | 20:30 (was 18:30) | `plan/data/eval_cases.csv` and `claims.csv` on main | — |
-| G4 Hero path on the mock | 20:15 (was 18:45) | The run streams; Break it works; one real run; explain-it drill 1; presenter audition | — |
+| G4 Hero path on the mock | 20:15 (was 18:45) | The run streams; Break it works; one real run; explain-it drill 1; presenter audition | DONE 19:50 (drill + audition: team) |
 | **G5 MVP: the real mechanism** | **22:30** (was 21:45) | 3 clean hero runs on the live URL; eval numbers so far; tag `ok-mvp` | — |
 | Break session 1 (outsiders) | 22:30–22:45 | 10 unprepared inputs tried; breaks logged; P0 fixes on the hero path only | — |
 | AUDIT → ROUND-1 kit | 22:45 → 23:10 | Audit verdict, "AUDIT PUSHED", tag `ok-r1`, backup video 1; then the running order | — |
@@ -79,17 +79,17 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 | # | Goal | Status | Live URL updated? | Tag |
 |---|---|---|---|---|
 | 0 | Skeleton: tokens, four fonts, `/app` shell with the sample class (26 real answers), `/` → `/app` (307), contracts, flags | DONE-TESTED (build + lint clean; 1440/768/390 checked, no overflow, no console errors) | Yes, 18:40 | ok-1840 = B0 state before step 0 |
-| 1 | Key test → hero path on the mock → Break it → one real run | NOT STARTED | — | — |
+| 1 | Key test → hero path on the mock → Break it → one real run | DONE-TESTED (keys: Gemini 3.8 Flash overloaded → 3.5 Flash-Lite OK, Groq OK; mock run and 2 real runs on the live URL; build + lint clean; 1440/768/390 no overflow; 0 console errors) | Yes, 19:45 | ok-1930 before; ok-1955 after |
 | 2 | MVP: real mechanism, approve, before/after, fallback, 3 replays | NOT STARTED | — | — |
 
 **Features shown in a round (≤ 6, only DONE-TESTED)** *(from 04 §22)*
 | Feature | Kind (HERO / TOP 3 / SHOWN / PARKED) | Status | Flag | Fallback tested? |
 |---|---|---|---|---|
-| Match my marking (K4) | HERO · TOP 3 | NOT STARTED | `MATCH_ENABLED` | — |
-| Quoted marks + hard checks + Break it (K2, K3) | TOP 3 | NOT STARTED | — | — |
+| Match my marking (K4) | HERO · TOP 3 | PARTIAL (runs 2 rounds live with code checks on the notes; does not yet raise matches: 4 of 6 → 4 of 6) | `MATCH_ENABLED` | — |
+| Quoted marks + hard checks + Break it (K2, K3) | TOP 3 | DONE-TESTED (live, 19:45: Break it thrown out → fixed on try 2; checks script in step 2) | — | Groq fallback took over live once |
 | Class mistake map (W2) | TOP 3 (after round 1) | NOT STARTED | — | — |
-| Review and approve (K5) | SHOWN | NOT STARTED | — | — |
-| Proof panel (K6) | SHOWN | NOT STARTED | `EVAL_PANEL` | — |
+| Review and approve (K5) | SHOWN | DONE-UNTESTED (approve scheme with edits, edit a mark, approve marks) | — | — |
+| Proof panel (K6) | SHOWN | PARTIAL (in-run agreement on 10 unseen + usage strip live; eval file in step 2) | `EVAL_PANEL` | — |
 | Objective exact match (D1) | SHOWN (after round 1) | NOT STARTED | — | — |
 
 ## 7. Must ship / cut first *(scope freeze 1, 04 §23; APPROVED 3 Oct)*
@@ -121,6 +121,10 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 - 3 Oct 18:40 · **Step 0: the sample six = A00, A01, A02, A06, A11, A19 (marks 5/3/4/3/5/4 from grader 1); unseen = the next 10; the typed scheme = the style preview's two criteria** · Claude's call inside 06 §11 (seed data); changeable in `web/lib/demo/sample.ts`
 - 3 Oct 18:40 · **Font licences verified (all SIL OFL 1.1) and logged in `assets/LICENSES.md`**; the ui-critic pass on step 0 was skipped to recover the 41 min (runs in step 1)
 - 3 Oct 19:20 · **`/app` redesigned to be louder and to show the problem without saying it (team lead's call, overrides 05 §10 "≤ 250 ms, state changes only" and 06 "no stat tiles")** · the lead found step 0 too plain. Added: a hero with a real answer two examiners marked 2 apart (switchable cases), a colour ribbon, "the pile" of 26 script tiles, colour-coded role badges and a colour key, a bright highlighter derived from `--signal`, one-shot motion (highlighter sweep, red-pen circles, count-ups when on screen); reduced motion = still. ui-critic run, its 8 P0/P1 fixed. Cost ≈ 40 min out of step 1's slack
+- 3 Oct 19:50 · **Primary model = `gemini-3.5-flash-lite`** (key test: 3.8 Flash answered "high demand", 3.5 Flash ran out of free quota after 4 calls; Flash-Lite ran a full hero run in 16 s) · Claude's call under 06 §11; set in `.env.local` and on Vercel
+- 3 Oct 19:50 · **The run is two requests: `stage: "tune"` then `stage: "mark"`**, with the teacher's approval of the notes in between (answers the 18:45 question); added a `scheme` event and `rejected.planted`; a code rule also drops notes that award more than a criterion's points
+- 3 Oct 19:50 · **The 10 answers that are neither six nor unseen are "not in this run"** (labelled on their cards) · keeps a hero run to ~8 calls on free tiers; marking them is step 4 work if wanted
+- 3 Oct 19:50 · **Break it is ticked by default** · the planned sad path shows in every demo run; untick for a clean run
 - 2 Oct · **Production deploys only from laptop A's CLI** (Vercel's Git connection is disconnected in B0) · a teammate's push must never redeploy during a freeze
 
 ## 9. Top risks (max 3)
@@ -129,4 +133,4 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 - A small team (advice: 5) and a beginner builder being asked how the tech works → explain-it drills, `plan/EXPLAIN.md`, the smallest architecture that runs the hero path
 
 ## 10. Links
-Repo git@github.com:Amith-Codez/aihack-mrdu-2026--19-.git (https://github.com/Amith-Codez/aihack-mrdu-2026--19-) · Live URL (the stable production alias) https://aihack-mrdu-2026-19.vercel.app · Last good deployment https://aihack-mrdu-2026-19-5gewxodif-amith6.vercel.app (step 0 skeleton, 3 Oct 18:40) · Last good tag ok-1840 (B0) · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon
+Repo git@github.com:Amith-Codez/aihack-mrdu-2026--19-.git (https://github.com/Amith-Codez/aihack-mrdu-2026--19-) · Live URL (the stable production alias) https://aihack-mrdu-2026-19.vercel.app · Last good deployment https://aihack-mrdu-2026-19-nbsk2crd6-amith6.vercel.app (step 1 hero path, 3 Oct 19:45) · Last good tag ok-1955 (step 1) · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon
