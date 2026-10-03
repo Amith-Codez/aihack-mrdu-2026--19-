@@ -15,3 +15,17 @@ CLAUDE.local.md
 assets/models/*.blend
 # the OS skills live on each laptop (copy them into clones); they are never pushed
 .claude/skills/
+
+# The team's working files (plans, pitch, design sources, organiser material, AI-assistant config)
+# stay on the laptops; the public repo holds the product only.
+/plan/
+/inputs/
+/pitch/
+/design/
+/assets/
+/.claude/
+/CLAUDE.md
+/.mcp.json
+/Claude outputs/
+/web/AGENTS.md
+/web/CLAUDE.md
