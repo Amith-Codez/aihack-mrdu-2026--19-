@@ -1,0 +1,891 @@
+{
+ "source": "Mohler ASAG dataset (Mohler, Bunescu, Mihalcea 2011), CC-BY-4.0, https://huggingface.co/datasets/nkazi/MohlerASAG, 'cleaned' config; all five questions are marked out of 5",
+ "questions": [
+  {
+   "id": "E07.Q07",
+   "question": "What is the main disadvantage of a doubly-linked list over a basic linked list?",
+   "referenceAnswer": "Extra space required to store the back pointers.",
+   "maxMarks": 5,
+   "answers": [
+    {
+     "id": "E07.Q07.A00",
+     "text": "they take up twice as much memory for each node",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A01",
+     "text": "In a doubly linked list, there are more pointers to set and the mechanics of inserting and deleting are more difficult. Also, the special cases at the beginning or end of the list are more complicated.",
+     "grader1": 3.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E07.Q07.A02",
+     "text": "There are more pointers to set, the mechanics of inserting into and deleting from a doubly linked list are a bit more involved than for a singly linked list.",
+     "grader1": 4.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E07.Q07.A03",
+     "text": "Insertion and deletion with a doubly linked list are more involved than with a singly linked list leaving more room for error and complex algorithms.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E07.Q07.A04",
+     "text": "Need more memory to store \"previous\" pointers.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A05",
+     "text": "a node in a doubly linked list takes up more memory than a node in a singly linked list.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A06",
+     "text": "You have to keep up with where you are and you have to consider the predecessor and successor connections when inserting or deleting.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E07.Q07.A07",
+     "text": "Each node requires an extra node, requires more memory, and is more difficult to insert and remove individual nodes",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A08",
+     "text": "Double-linked lists require more space per node, and their elementary operations are more expensive",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A09",
+     "text": "More difficult to delete and create nodes.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E07.Q07.A10",
+     "text": "They use more memory and you have to make 2 pointers and update 2 pointers each time you change the list.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A11",
+     "text": "nodes take up more memory",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A12",
+     "text": "Each node requires an extra pointer ( space requirements increased ) , Insertion or deletion of a node takes a longer ( more pointer operations ) .",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A13",
+     "text": "its a little more confusing. The special cases at the end and beginning become more difficult to do.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E07.Q07.A14",
+     "text": "increased actions to add and remove elements to the linked list.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E07.Q07.A15",
+     "text": "Inserting and deleting in a double-linked list is more involved, and has special cases at the beginning and end.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E07.Q07.A16",
+     "text": "The main disadvanate is that if hard to remove all items in the list.",
+     "grader1": 3.0,
+     "grader2": 1.0
+    },
+    {
+     "id": "E07.Q07.A17",
+     "text": "each node requires an extra pointer, taking up more storage. insertions and deletions require more pointer operations.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A18",
+     "text": "in a doubly linked list there are twice as many pointers for each element, therefore more memory is used",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A19",
+     "text": "The process of adding and removing Nodes in a Doubly linked list is more complex than in a basic linked list",
+     "grader1": 4.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E07.Q07.A20",
+     "text": "Double linked lists require more space per node, and their elementary operation are more expensive",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A21",
+     "text": "1-each node requires an extra pointer, requiring more space 2-the insertion or deletion of a node takes a bit longer, more pointer operations",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A22",
+     "text": "It takes up twice the storage needed.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A23",
+     "text": "using more pointers to enable the backward movement takes up more memory, having more pointers make it slightly more work to add or remove a node from the list",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A24",
+     "text": "increased memory requirements, slightly more complicated when modifying elements in the list",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E07.Q07.A25",
+     "text": "not answered",
+     "grader1": 0.0,
+     "grader2": 0.0
+    }
+   ]
+  },
+  {
+   "id": "E03.Q03",
+   "question": "How does the compiler handle inline functions?",
+   "referenceAnswer": "It makes a copy of the function code in every place where a function call is made.",
+   "maxMarks": 5,
+   "answers": [
+    {
+     "id": "E03.Q03.A00",
+     "text": "It expands the function 's definition in that place. Once the functions is called you can use it as many times as you need. The compiler just expands on the function.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E03.Q03.A01",
+     "text": "When the compiler inline-expands a function call, the function 's code gets inserted into the caller 's code stream ( conceptually similar to what happens with a define macro ) . This can, depending on a zillion other things, improve performance, because the optimizer can procedurally integrate the called code optimize the called code into the caller.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E03.Q03.A02",
+     "text": "The inline keyword advises the compiler to copy the function 's code in place to avoid function calls; however the compiler can and typically does ignore the inline qualifier for all but the smallest functions.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A03",
+     "text": "The compiler can ignore the inline qualifier and typically does so for all but the smallest functions.",
+     "grader1": 4.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E03.Q03.A04",
+     "text": "Placing the qualifier inline before a function 's return type in the function definition \"advises\" the compiler to generate a copy of the function 's code in place to avoid a function call.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A05",
+     "text": "You declare your inline function in the header or before your int main ( ) . You then can call that function at anytime in your main program quickly and easily.",
+     "grader1": 4.0,
+     "grader2": 0.0
+    },
+    {
+     "id": "E03.Q03.A06",
+     "text": "It expands a small function out ... making your code longer, but also makes it run faster.",
+     "grader1": 4.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E03.Q03.A07",
+     "text": "the function is not treated as a separate unit like other functions",
+     "grader1": 3.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E03.Q03.A08",
+     "text": "When the program compiles, it will copy the function inplace, avoiding a function call.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A09",
+     "text": "It replaces all instances of that function call with the inline code itself, resulting in longer but faster programs.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A10",
+     "text": "The compiler can ignore the inline qualifier and typically does so for all but the smallest functions.",
+     "grader1": 4.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E03.Q03.A11",
+     "text": "Ignores the inline qualifier and typically does so for all but the smallest functions.",
+     "grader1": 4.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E03.Q03.A12",
+     "text": "If the function is small enough it will expand it but it will run faster as it will avoid making so many calls to the function.",
+     "grader1": 4.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A13",
+     "text": "it treats them as the same function",
+     "grader1": 2.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E03.Q03.A14",
+     "text": "Inline functions are copied in place, instead of being referenced.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A15",
+     "text": "For inline functions, the compiler creates a copy of the function 's code in place so it does not have to make a function call and add to the function call stack.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A16",
+     "text": "it generates a copy of the function 's coding which eliminates calling the function",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A17",
+     "text": "not answered",
+     "grader1": 0.0,
+     "grader2": 0.0
+    },
+    {
+     "id": "E03.Q03.A18",
+     "text": "It generates a copy of the function 's code by by inserting it in the program.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E03.Q03.A19",
+     "text": "tells the compiler to make a copy of function 's code in place to avoid a function call. it typically ignores it, except for the smallest functions.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A20",
+     "text": "The compiler can ignore the inline qualifier and typically does so for all but the smallest functions.",
+     "grader1": 2.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E03.Q03.A21",
+     "text": "Multiple copies of the function code are inserted into the program, making it bigger.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E03.Q03.A22",
+     "text": "compiler ignores inline qualifier",
+     "grader1": 3.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E03.Q03.A23",
+     "text": "It generates a copy of the function, if it is needed again.",
+     "grader1": 5.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E03.Q03.A24",
+     "text": "The complier includes copies of inline functions instead of making function calls, but usually only with very small functions.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A25",
+     "text": "Compiler generate a copy of the function 's code in place ( when appropriate ) to avoid a function call",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A26",
+     "text": "instead of calling the function every time it is invoked, the compiler will replace the function call with a copy of the function body",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A27",
+     "text": "Expands the function into the program",
+     "grader1": 4.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E03.Q03.A28",
+     "text": "it generates a copy of the functions code in place to avoid a function call",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A29",
+     "text": "the function call will be replaced by the code that was defined in the inline function",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E03.Q03.A30",
+     "text": "When the compiler inline-expands a function call, the function 's code gets inserted into the caller 's code stream ( conceptually similar to what happens with a define macro ) . This can, depending on a zillion other things, improve performance, because the optimizer can procedurally integrate the called code optimize the called code into the caller.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    }
+   ]
+  },
+  {
+   "id": "E08.Q06",
+   "question": "How are infix expressions evaluated by computers?",
+   "referenceAnswer": "First, they are converted into postfix form, followed by an evaluation of the postfix expression.",
+   "maxMarks": 5,
+   "answers": [
+    {
+     "id": "E08.Q06.A00",
+     "text": "They are converted to post fix expressions. It still follow the order of precedence for the operators.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A01",
+     "text": "They are first converted to postfix expressions and then evaluated.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A02",
+     "text": "Computers cannot evaulate infix expressions, it must first convert infix to postfix expression then it can evaluate.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A03",
+     "text": "By using parentheses to have order in the expression.",
+     "grader1": 3.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E08.Q06.A04",
+     "text": "In postfix notation.",
+     "grader1": 5.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E08.Q06.A05",
+     "text": "computers usually convert infix expressions to post fix expression and evaluate them using a stack.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A06",
+     "text": "they are converted to postfix",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A07",
+     "text": "Infix expressions are interpreted as postfix expressions by implementing stacks.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A08",
+     "text": "They are first converted into an equivalent postfix expression so it can be read by the computer.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A09",
+     "text": "The computer translates the infix expression to a postfix expression, then solves.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A10",
+     "text": "in postfix format",
+     "grader1": 5.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E08.Q06.A11",
+     "text": "they use parenthisis and a stack to determine which evaluations need to be made first",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E08.Q06.A12",
+     "text": "By throwing variables into a postfix expression and operands onto a parentheses regulated stack until end parentheses and enough variables to operate on are encountered.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E08.Q06.A13",
+     "text": "by being passed to the function by a leading term",
+     "grader1": 3.0,
+     "grader2": 0.0
+    },
+    {
+     "id": "E08.Q06.A14",
+     "text": "i have an hard time explaining this so i will show how infix is evaluated instead. Start with an infix expression, like, ( ( ( 5 plus 2 ) multiplied by 5 ) plus ( 400 divided by ( 2 plus 3 ) ) ) , and push items until you get a \" ) \" and once that happens, perform the operations until you reach an \" ( \" ... with that complete, you will now have ( ( 7 multiplied by 5 ) plus ( 400 divided by ( 2 plus 3 ) ) ) as now the expression that will be evaluated ... perform last step again ... ( 35 plus ( 400 divided by ( 2 plus 3 ) ) ) is now the stack ... repeat agian ... ( 35 plus ( 400 divided by 5 ) ) is now the stack after that ... repeat ... ( 35 plus 80 ) is now the stack, repeat again ... 115 is now the stack, and is returned.",
+     "grader1": 4.0,
+     "grader2": 1.0
+    },
+    {
+     "id": "E08.Q06.A15",
+     "text": "The infix expression is converted to postfix form",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A16",
+     "text": "by converting them to postfix expressions and putting the operations in a stack",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A17",
+     "text": "The computer converts the infix expression to postfix form. Then evaluates the postfix expression.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A18",
+     "text": "infix expressions are converted to postfix expressions before they can be evaluated by a computer. Operands stay in the same order. Operators always follow the operands.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A19",
+     "text": "infix expressions are pointers evaluated by reference to the memory location",
+     "grader1": 3.0,
+     "grader2": 0.0
+    },
+    {
+     "id": "E08.Q06.A20",
+     "text": "computers convert infix expressions to postfix form before evaluation",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A21",
+     "text": "convert infix expressions to postfix expression and evaluate the postfix expression",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A22",
+     "text": "When an operand is entered, the computer Pushes it onto a stack When an operator is entered, the computer Applies it to the top two operands of the stack Pops the operands from the stack Pushes the result of the operation onto the stack",
+     "grader1": 4.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E08.Q06.A23",
+     "text": "Computers convert an infix expression into a postfix expression. They then push the numbers onto a stack and pop them out as they are needed.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A24",
+     "text": "infix expressions are converted to postfix, ( i. e. 3 plus 2 is changed to 32 plus )",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A25",
+     "text": "they are transformed into post-fix expressions, then evaluated with a stack.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E08.Q06.A26",
+     "text": "Writing arithmetic expressions is called infix notation. This is because a binary operator ( like \"plus\" ) is written in between its two operands ( as in \"a plus b\" ) . There are two alternative forms of notation used in certain situations. One is prefix notation, in which an operator is written before its operands. In prefix notation, the sum of a and b is written \"plus a b\". This is the notation used to write function calls in mathematics and computer science. It is also used in the Lisp and Scheme programming languages. In postfix notation, an operator is written after its operands. The sum of a and b is written \"a b plus\". ( You may have seen this as \"reverse Polish notation\". ) Postfix notation forms the conceptual basis for the way that arithmetic expressions are evaluated by a computer. One important characteristic of both postfix and prefix notations is that they are unambiguous; no parentheses are needed to indicate the order of operations.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    }
+   ]
+  },
+  {
+   "id": "E05.Q04",
+   "question": "What is the base case for a recursive implementation of merge sort?",
+   "referenceAnswer": "When the size of the array to be sorted is 1 ( or 2 )",
+   "maxMarks": 5,
+   "answers": [
+    {
+     "id": "E05.Q04.A00",
+     "text": "The base case for a recursive merge sort is one number. One number by itself is a sorted list, regardless of what number it is.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A01",
+     "text": "The base case for a recursive implementation of merge sort is when the sequence being passed to merge sort has less than 2 elements.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A02",
+     "text": "The base case for a recursive implementation of merge sort is one.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A03",
+     "text": "The best case is the same as the worst case O ( n log n ) for a recursive merge sort.",
+     "grader1": 3.0,
+     "grader2": 1.0
+    },
+    {
+     "id": "E05.Q04.A04",
+     "text": "there is one object in the split array to sort.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A05",
+     "text": "The base case is when the length of the current array is 1.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A06",
+     "text": "O ( nlog ( n ) )",
+     "grader1": 4.0,
+     "grader2": 1.0
+    },
+    {
+     "id": "E05.Q04.A07",
+     "text": "Best case is one element. One element is sorted.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A08",
+     "text": "If the array being sorted has 0 or 1 elements",
+     "grader1": 4.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A09",
+     "text": "T ( n ) equals 0, if n is less than 2.",
+     "grader1": 4.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E05.Q04.A10",
+     "text": "A list size of 1, where it is already sorted.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A11",
+     "text": "Single element in the array",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A12",
+     "text": "O ( nlog ( n ) )",
+     "grader1": 3.0,
+     "grader2": 1.0
+    },
+    {
+     "id": "E05.Q04.A13",
+     "text": "n multiplied by log ( n )",
+     "grader1": 3.0,
+     "grader2": 1.0
+    },
+    {
+     "id": "E05.Q04.A14",
+     "text": "A list or array of only 1 element.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A15",
+     "text": "where you only must merge sort once",
+     "grader1": 4.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E05.Q04.A16",
+     "text": "A single Element on the Array.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A17",
+     "text": "There is only one element in the subarray.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A18",
+     "text": "if the array length is less than or equal to 1, then that array is returned to the other array and merged together",
+     "grader1": 4.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A19",
+     "text": "if ( right is greater than left ) mid equals ( right plus left ) divided by 2; m sort ( numbers, temp, left, mid ) ; m sort ( numbers, temp, mid plus 1, right ) ; merge ( numbers, temp, left, mid plus 1, right ) ;",
+     "grader1": 2.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E05.Q04.A20",
+     "text": "The sequence of numbers has zero or one elements.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A21",
+     "text": "one element in an array",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A22",
+     "text": "array of length 1",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A23",
+     "text": "the array has one element",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A24",
+     "text": "When there is only one element in the array, or when the starting element in the array is the same as the ending element.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E05.Q04.A25",
+     "text": "when each half or the original array has nothing else to sort, and puts the halfs back together",
+     "grader1": 3.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E05.Q04.A26",
+     "text": "the size of the list being sent is is less than or equal to 1",
+     "grader1": 4.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E05.Q04.A27",
+     "text": "O ( n log n )",
+     "grader1": 3.0,
+     "grader2": 1.0
+    }
+   ]
+  },
+  {
+   "id": "E01.Q02",
+   "question": "What stages in the software life cycle are influenced by the testing stage?",
+   "referenceAnswer": "The testing stage can influence both the coding stage ( phase 5 ) and the solution refinement stage ( phase 7 )",
+   "maxMarks": 5,
+   "answers": [
+    {
+     "id": "E01.Q02.A00",
+     "text": "Refining and possibly the design if the testing phase reveals problems in the design. Production can be affected if the program is unworkable in its current form which will lead to a later production time than originally estimated. Also affects coding because after testing you may need to rewrite the code for the program to remove errors.",
+     "grader1": 2.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E01.Q02.A01",
+     "text": "The implementation phase and the maintenance phase are effected",
+     "grader1": 5.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A02",
+     "text": "Verification, coding, refining the solution and maintenance are all influenced by the testing stage.",
+     "grader1": 5.0,
+     "grader2": 4.0
+    },
+    {
+     "id": "E01.Q02.A03",
+     "text": "In RUP the stages in the software life cycle are influenced by the testing stage is: Elaboration phase-refined progject vision, iterative devilopment of core system, development of system requirements, more accurate time and cost estimates. Construction phase-iterative development of remaining system. Transition phase-testing and deployment of the system.",
+     "grader1": 4.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A04",
+     "text": "Refining the solution, Production and Maintenance are all influenced by the Testing stage.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A05",
+     "text": "Elaboration, Construction, and Transition are all affected by testing",
+     "grader1": 2.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A06",
+     "text": "Refining, Production, Maintenance",
+     "grader1": 4.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A07",
+     "text": "Refining the solution",
+     "grader1": 5.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A08",
+     "text": "Verification Debugging",
+     "grader1": 1.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A09",
+     "text": "Refining and Coding",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E01.Q02.A10",
+     "text": "The second half of the Elaboration phase, Construction phase, and the Transition phase.",
+     "grader1": 3.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A11",
+     "text": "The refining step, the production step, and the maintenance stage.",
+     "grader1": 4.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A12",
+     "text": "Elaboration, Construction, Transition",
+     "grader1": 2.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A13",
+     "text": "Refining.",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A14",
+     "text": "The testing stage has a direct influence on the final version of a program, being as it is the debugging and finalization of a software revision.",
+     "grader1": 1.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A15",
+     "text": "Directly: Refining, coding. Because Refining is right before the Testing Phase and Coding is right after the Testing Phase. Indirectly: Production, Maintenance. Because Refining occurs before these last two stages in the Software Life Cycle.",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E01.Q02.A16",
+     "text": "Testing, refining, production, and maintenance.",
+     "grader1": 4.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A17",
+     "text": "Depending on how the work is done, Testing is spread throughout the process as to prevent errors from showing up later on due to lack of foresight.",
+     "grader1": 1.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A18",
+     "text": "Elaboration, construction, and transition.",
+     "grader1": 3.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A19",
+     "text": "All stages are influenced except setting the program requirements. If a test fails, it can change the whole design, implementation, etc of a program as well as the final outcome.",
+     "grader1": 1.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A20",
+     "text": "Refining, production, and maintenance",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A21",
+     "text": "coding and refining",
+     "grader1": 5.0,
+     "grader2": 5.0
+    },
+    {
+     "id": "E01.Q02.A22",
+     "text": "refining, production, maintenance.",
+     "grader1": 4.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A23",
+     "text": "Removing logical errors, testing for valid data, random data and actual data.",
+     "grader1": 0.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A24",
+     "text": "1-specification 2-design 3-risk analysis 4-verification 5-coding 6-testing 7-refining 8-production 9-maintenance",
+     "grader1": 4.0,
+     "grader2": 1.0
+    },
+    {
+     "id": "E01.Q02.A25",
+     "text": "Refining stage, Production stage, and Maintenance stage.",
+     "grader1": 4.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A26",
+     "text": "Testing could affect all parts of the life cycle; it could make you go back to specification if it does not test well.",
+     "grader1": 2.0,
+     "grader2": 2.0
+    },
+    {
+     "id": "E01.Q02.A27",
+     "text": "coding",
+     "grader1": 3.0,
+     "grader2": 3.0
+    },
+    {
+     "id": "E01.Q02.A28",
+     "text": "The Individual components and steps such as analysis, design, and implementing code as well as the entire system are tested for execution of the requirements identified during the analysis stage. i. e. Main output",
+     "grader1": 2.0,
+     "grader2": 1.0
+    }
+   ]
+  }
+ ]
+}
