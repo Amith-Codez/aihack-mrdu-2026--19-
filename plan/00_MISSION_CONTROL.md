@@ -4,12 +4,12 @@
 > Status only: details live in files 01–09. It should be readable in 30 seconds.
 > **Two engines:** 🧠 **COWORK** plans (files 01–06, 08, and the `design/`, `assets/`, `pitch/` folders) · 🛠 **CLAUDE CODE** builds (the app in `web/`, files 07 and 09).
 
-**Last updated:** 3 Oct 2026 · **by:** P1-HOME funnel (Cowork)
+**Last updated:** 3 Oct 2026 · **by:** B0 early setup (Claude Code)
 
 ## 1. WHERE WE ARE NOW
 - **Engine to use now:** 🧠 COWORK (pre-event)
 - **Step:** 6 done · Look approved (05): "Examiner's margin, loud" (ruled paper, ink outlines with hard shadows, circled red-pen marks, stamps), palette ALL PASS with all text ≥ 7:1, `pitch/style-preview.html` v2, audit P0 fixed
-- **Next action (one):** paste **P5** in Cowork (architecture, stack, build plan). **B0 has not run: there is no `web/` folder and no repo yet. Paste B0 in Claude Code now, in parallel**
+- **Next action (one):** paste **P5** in Cowork (architecture, stack, build plan). B0 done (blank app live at https://aihack-mrdu-2026-19.vercel.app); the GitHub repo must be switched to private before the first push
 - **Blocker:** **BEHIND: G2 (plan READY, 14:45) is missed; G3 (skeleton live, 15:45) will be missed too.** Recovery in force: P4 cut to palette plus one screen; P5 keeps the stack defaults. Open: funded API key and fallback key (SPIKE not started) · two lecturer conversations · the core is 6 h of 6 h with no slack, and it now starts late
 
 ## 2. Event
@@ -40,7 +40,7 @@
 | 1 | Recon (refreshed 2 Oct) | 🧠 COWORK | — | 01 | — | DONE |
 | — | Keys spike (both laptops, before the event) | 🛠 CLAUDE CODE | SPIKE | outside this folder | — | NOT STARTED |
 | 2 | Problem funnel: 100+ → top 10 → top 3 → one (stages 1–9) | 🧠 COWORK | P1 / P1-HOME | 02 | ✋ problem | DONE · APPROVED 3 Oct (HOME lane) |
-| 3 | Early setup (repo, blank deploy, packages), in parallel with P1 | 🛠 CLAUDE CODE | B0 | `web/` | — | NOT STARTED |
+| 3 | Early setup (repo, blank deploy, packages), in parallel with P1 | 🛠 CLAUDE CODE | B0 | `web/` | — | DONE · blank app live; push waits for the repo to be made private |
 | 4 | Validation · existing solutions · gap · difference (stages 10–13) | 🧠 COWORK | P2 | 03 | — | DONE (HOME lane) · GO WITH FIXES |
 | 5 | Concept · agentic fit · features · scope freeze 1 (stages 14–16) | 🧠 COWORK | P3 | 04 | ✋ concept · ✋ scope | DONE · concept C2 · scope freeze 1 APPROVED 3 Oct |
 | 6 | Look of the hero screen | 🧠 COWORK | P4 | 05, `design/` | ✋ look | DONE · GO 3 Oct 15:22 |
@@ -111,6 +111,7 @@ Hours for the forge: core loop 6 h (steps 1–2) · **features 1.5 h** (step 4, 
 - 3 Oct · **Never say "calibration"** · the lead did not follow the word; the step is called "Match my marking" on screen and in the pitch
 - 3 Oct · **Scope freeze 1 APPROVED** · 4 MUST, hero = Match my marking, at most 6 shown
 - 3 Oct · **Look = "Examiner's margin, loud"** · the lead asked for a Gen-Z look that fits the project; kept ≥ 7:1 text and no dependence on animation for the video call
+- 3 Oct · **B0: Vercel project `aihack-mrdu-2026--19-` (team amith6), no Git connection, story: yes → cinematic packages installed on main** · deploys only from this laptop's CLI; one laptop may run both lanes (story in a second clone on branch `story`)
 - 2 Oct · **Production deploys only from laptop A's CLI** (Vercel's Git connection is disconnected in B0) · a teammate's push must never redeploy during a freeze
 
 ## 9. Top risks (max 3)
@@ -119,4 +120,4 @@ Hours for the forge: core loop 6 h (steps 1–2) · **features 1.5 h** (step 4, 
 - A small team (advice: 5) and a beginner builder being asked how the tech works → explain-it drills, `plan/EXPLAIN.md`, the smallest architecture that runs the hero path
 
 ## 10. Links
-Repo — · Live URL (the stable production alias) — · Last good deployment — · Last good tag — · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon
+Repo git@github.com:Amith-Codez/aihack-mrdu-2026--19-.git (https://github.com/Amith-Codez/aihack-mrdu-2026--19-) · Live URL (the stable production alias) https://aihack-mrdu-2026-19.vercel.app · Last good deployment https://aihack-mrdu-2026-19-j0ygv1dm4-amith6.vercel.app (B0 blank app, 3 Oct) · Last good tag — · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon
