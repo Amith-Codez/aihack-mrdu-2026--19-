@@ -7,14 +7,28 @@
   --font-display: var(--ff-display);
   --font-mono: var(--ff-mono);
   --font-pen: var(--ff-pen);
-  --radius-card: 12px;
-  --radius-badge: 6px;
 }
 
-/* ── Examiner's margin, loud (05 §6–9). Colours only from tokens. ── */
+/* ── Examiner's margin, loud (05 §6–9). Every colour is a token or a color-mix of tokens.
+   Colour has one job each: blue ink = the tool acts · highlighter = evidence · red pen = the teacher · green = a check passed. ── */
+:root {
+  --ink: var(--foreground);
+  --tint-blue: color-mix(in oklch, var(--primary) 12%, var(--surface));
+  --tint-yellow: var(--signal-soft);
+  --tint-red: color-mix(in oklch, var(--danger) 9%, var(--surface));
+  --tint-green: color-mix(in oklch, var(--success) 10%, var(--surface));
+  --tint-teal: color-mix(in oklch, var(--info) 11%, var(--surface));
+  --ease-pen: cubic-bezier(.65, 0, .35, 1);
+  /* bright highlighter fill derived from the signal token; --signal stays for underlines and shadows */
+  --highlighter: var(--signal-soft);
+}
+@supports (color: oklch(from red l c h)) {
+  :root { --highlighter: oklch(from var(--signal) 0.9 0.17 h); }
+}
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
-  html { color-scheme: light; }
+  html { color-scheme: light; scroll-behavior: smooth; }
   body {
     margin: 0;
     color: var(--foreground);
@@ -27,58 +41,167 @@
   }
   h1, h2, h3 { font-family: var(--ff-display), var(--ff-text), sans-serif; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
   :focus-visible { outline: 4px solid var(--ring); outline-offset: 3px; }
+  ::selection { background: var(--signal-soft); color: var(--foreground); }
 }
 
 @layer components {
-  .mm-wrap { max-width: 1400px; margin: 0 auto; padding: 24px 24px 64px 72px; }
-  .mm-mono { font-family: var(--ff-mono), ui-monospace, monospace; font-weight: 600; }
+  .mm-wrap { overflow-x: clip; max-width: 1400px; margin: 0 auto; padding: 18px 24px 64px 72px; }
+  .mm-mono { font-family: var(--ff-mono), ui-monospace, monospace; font-weight: 600; font-variant-numeric: tabular-nums; }
   .mm-pen { font-family: var(--ff-pen), cursive; font-weight: 700; color: var(--danger); }
   .mm-muted { color: var(--muted-foreground); }
   .mm-small { font-size: 15px; }
 
-  .mm-hl { background: var(--signal-soft); box-shadow: 0 -5px 0 var(--signal) inset; padding: 0 6px; display: inline-block; transform: rotate(-1.2deg); }
-  .mm-sticker { display: inline-block; font: 800 17px var(--ff-display), sans-serif; background: var(--signal); color: var(--foreground); border: 2.5px solid var(--foreground); border-radius: 999px; padding: 8px 16px; transform: rotate(4deg); box-shadow: 4px 4px 0 var(--foreground); }
+  /* ── top bar ── */
+  .mm-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding-bottom: 14px; border-bottom: 2.5px solid var(--ink); }
+  .mm-logo { font: 800 26px/1 var(--ff-display), sans-serif; letter-spacing: -.03em; display: inline-flex; align-items: baseline; gap: 2px; text-decoration: none; color: var(--ink); }
+  .mm-logo b { position: relative; color: var(--danger); padding: 0 4px; }
+  .mm-chip { display: inline-flex; align-items: center; gap: 8px; font: 600 13px/1 var(--ff-mono), monospace; padding: 8px 12px; border: 2px solid var(--ink); border-radius: 999px; background: var(--surface); }
+  .mm-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); }
 
+  /* ── hero: the problem, shown with a real answer ── */
+  .mm-hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px; align-items: center; padding: 34px 0 30px; }
+  .mm-hero h1 { font-size: clamp(40px, 5.2vw, 72px); line-height: .98; }
+  .mm-hero .mm-lede { font-size: 21px; max-width: 40ch; margin: 18px 0 0; }
+  .mm-kicker { font: 600 13px/1 var(--ff-mono), monospace; letter-spacing: .08em; display: inline-flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .mm-kicker i { width: 26px; height: 3px; background: var(--danger); display: inline-block; }
+
+  .mm-hl {
+    background-image: linear-gradient(var(--highlighter), var(--highlighter));
+    background-repeat: no-repeat; background-size: 100% 100%;
+    box-shadow: 0 -6px 0 var(--signal) inset; padding: 0 8px; display: inline-block; transform: rotate(-1.2deg);
+    animation: mm-sweep 700ms var(--ease-pen) 250ms both;
+  }
+  @keyframes mm-sweep { from { background-size: 0% 100%; box-shadow: 0 0 0 var(--signal) inset; } to { background-size: 100% 100%; box-shadow: 0 -6px 0 var(--signal) inset; } }
+
+  .mm-sticker { display: inline-block; font: 800 17px var(--ff-display), sans-serif; background: var(--highlighter); color: var(--foreground); border: 2.5px solid var(--foreground); border-radius: 999px; padding: 8px 16px; transform: rotate(4deg); box-shadow: 4px 4px 0 var(--foreground); white-space: nowrap; }
+
+  /* the exhibit: one answer, two examiners */
+  .mm-exhibit { position: relative; background: var(--surface); border: 2.5px solid var(--ink); border-radius: 14px; box-shadow: 10px 10px 0 var(--ink); padding: 22px 22px 18px; transform: rotate(.6deg); }
+  .mm-exhibit-wrap { position: relative; isolation: isolate; }
+  .mm-exhibit-wrap::before { /* the script under it */
+    content: ""; position: absolute; inset: 10px -12px 34px 10px; z-index: -1; border: 2.5px solid var(--ink); border-radius: 14px; background: var(--tint-yellow); transform: rotate(-3deg);
+  }
+  .mm-exhibit .mm-answer { font-size: 22px; line-height: 1.4; margin: 10px 0 18px; }
+  .mm-split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .mm-examiner { border: 2px dashed var(--border-strong); border-radius: 10px; padding: 10px 12px 12px; text-align: center; background: var(--surface); }
+  .mm-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .mm-tab { font: 600 13px/1 var(--ff-mono), monospace; padding: 8px 11px; border: 2px solid var(--ink); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; }
+  .mm-tab[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+  /* ── stat ribbon ── */
+  .mm-ribbon { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 2.5px solid var(--ink); border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: 6px 6px 0 var(--ink); margin-bottom: 34px; }
+  .mm-ribbon > div { padding: 16px 20px; display: flex; gap: 14px; align-items: center; }
+  .mm-ribbon > div + div { border-left: 2.5px solid var(--ink); }
+  .mm-ribbon .mm-num { font-size: 40px; }
+  .mm-ribbon .r1 { background: var(--tint-red); } .mm-ribbon .r2 { background: var(--tint-yellow); } .mm-ribbon .r3 { background: var(--tint-blue); }
+
+  /* ── cards ── */
   .mm-card { background: var(--surface); border: 2.5px solid var(--foreground); border-radius: 12px; padding: 16px 18px; box-shadow: 6px 6px 0 var(--foreground); position: relative; }
   .mm-card.blue { box-shadow: 6px 6px 0 var(--primary); }
   .mm-card.red { border-color: var(--danger); box-shadow: 6px 6px 0 var(--danger); }
+  .mm-card.yours { background: var(--tint-yellow); box-shadow: 6px 6px 0 var(--signal); }
+  .mm-card.unseen { box-shadow: 6px 6px 0 var(--primary); }
+  .mm-card.unseen::after { content: ""; position: absolute; left: -2.5px; top: 14px; bottom: 14px; width: 6px; background: var(--primary); border-radius: 0 4px 4px 0; }
+
+  .mm-section-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
   .mm-badge { display: inline-block; font: 600 12px/1 var(--ff-mono), monospace; letter-spacing: .06em; padding: 6px 8px; border: 2px solid var(--foreground); border-radius: 6px; background: var(--surface); white-space: nowrap; }
-  .mm-badge.agent { background: var(--primary); color: var(--primary-foreground); transform: rotate(-4deg); }
+  .mm-badge.CODE { background: var(--tint-teal); color: var(--info); border-color: var(--info); }
+  .mm-badge.MODEL { background: var(--tint-blue); color: var(--primary); border-color: var(--primary); }
+  .mm-badge.AGENT { background: var(--primary); color: var(--primary-foreground); border-color: var(--ink); transform: rotate(-4deg); box-shadow: 2px 2px 0 var(--ink); }
+  .mm-badge.HUMAN { background: var(--tint-red); color: var(--danger); border-color: var(--danger); }
+  .mm-tag { display: inline-block; font: 600 11px/1 var(--ff-mono), monospace; letter-spacing: .06em; padding: 5px 7px; border-radius: 6px; border: 2px solid currentColor; white-space: nowrap; }
 
-  .mm-step { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 2px dotted var(--border-strong); }
+  /* steps rail */
+  .mm-step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; padding: 12px 0; border-bottom: 2px dotted var(--border-strong); }
   .mm-step:last-child { border-bottom: 0; }
+  .mm-stepnum { width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--ink); display: grid; place-items: center; font: 600 13px var(--ff-mono), monospace; background: var(--surface); }
+  .mm-step.is-done .mm-stepnum { background: var(--success); color: var(--surface); border-color: var(--ink); }
+  .mm-step.is-agent { background: var(--tint-blue); margin: 0 -18px; padding-left: 18px; padding-right: 18px; }
+
+  .mm-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-top: 12px; }
+  .mm-legend span { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .mm-legend i { width: 22px; height: 14px; border: 2px solid var(--ink); border-radius: 4px; flex: none; }
 
   .mm-ok { color: var(--success); font-weight: 600; }
   .mm-bad { color: var(--danger); font-weight: 600; }
 
-  .mm-circle { font-size: 54px; line-height: 1; border: 3.5px solid var(--danger); border-radius: 50%; padding: 2px 16px 8px; transform: rotate(-7deg); display: inline-block; white-space: nowrap; }
-  .mm-stamp { position: absolute; right: 14px; top: -16px; font: 800 15px var(--ff-display), sans-serif; letter-spacing: .08em; color: var(--danger); border: 3px solid var(--danger); border-radius: 6px; padding: 3px 10px; background: var(--surface); transform: rotate(7deg); }
+  /* red-pen circle that draws itself (an SVG path, pathLength=1) */
+  .mm-circled { position: relative; display: inline-grid; place-items: center; padding: 6px 16px 10px; }
+  .mm-circled svg { position: absolute; inset: -4px -6px; width: calc(100% + 12px); height: calc(100% + 8px); overflow: visible; pointer-events: none; }
+  .mm-circled path { fill: none; stroke: var(--danger); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; animation: mm-draw 650ms var(--ease-pen) both; animation-delay: var(--d, 600ms); }
+  @keyframes mm-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  .mm-bigmark { font: 700 54px/1 var(--ff-pen), cursive; color: var(--danger); transform: rotate(-6deg); display: inline-block; }
+
+  .mm-stamp { position: absolute; right: 14px; top: -16px; font: 800 14px var(--ff-display), sans-serif; letter-spacing: .08em; color: var(--danger); border: 3px solid var(--danger); border-radius: 6px; padding: 3px 10px; background: var(--surface); transform: rotate(7deg); }
   .mm-stamp.green { color: var(--success); border-color: var(--success); transform: rotate(-6deg); }
+  .mm-stamp.yellow { color: var(--ink); border-color: var(--ink); background: var(--highlighter); transform: rotate(-4deg); }
 
-  .mm-btn { font: 800 20px var(--ff-display), sans-serif; padding: 13px 22px; border-radius: 12px; border: 2.5px solid var(--foreground); background: var(--primary); color: var(--primary-foreground); cursor: pointer; box-shadow: 5px 5px 0 var(--foreground); transition: transform 120ms ease, box-shadow 120ms ease; }
-  .mm-btn:active { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--foreground); }
+  .mm-btn { font: 800 20px var(--ff-display), sans-serif; padding: 13px 22px; border-radius: 12px; border: 2.5px solid var(--foreground); background: var(--primary); color: var(--primary-foreground); cursor: pointer; box-shadow: 5px 5px 0 var(--foreground); transition: transform 120ms ease, box-shadow 120ms ease; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+  .mm-btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 7px 7px 0 var(--foreground); }
+  .mm-btn:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--foreground); }
   .mm-btn.ghost { background: var(--surface); color: var(--foreground); }
-  .mm-btn:disabled { cursor: not-allowed; opacity: .6; }
+  .mm-btn.yellow { background: var(--highlighter); color: var(--ink); }
+  .mm-btn:disabled { cursor: not-allowed; background: var(--surface-2); color: var(--muted-foreground); box-shadow: 5px 5px 0 var(--border-strong); border-color: var(--border-strong); }
 
-  .mm-num { font: 800 44px/1 var(--ff-display), sans-serif; }
+  .mm-num { font: 800 44px/1 var(--ff-display), sans-serif; font-variant-numeric: tabular-nums; }
 
-  .mm-markbox { width: 64px; font: 600 22px var(--ff-mono), monospace; text-align: center; padding: 6px 4px; border: 2.5px solid var(--foreground); border-radius: 8px; background: var(--surface); color: var(--foreground); box-shadow: 3px 3px 0 var(--foreground); }
+  .mm-markbox { width: 64px; font: 600 24px var(--ff-mono), monospace; text-align: center; padding: 6px 4px; border: 2.5px solid var(--danger); border-radius: 10px; background: var(--surface); color: var(--danger); box-shadow: 3px 3px 0 var(--danger); }
+  .mm-markbox[aria-invalid="true"] { background: var(--tint-red); }
 
-  .mm-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
-  @media (max-width: 1180px) { .mm-grid { grid-template-columns: 280px minmax(0, 1fr); } .mm-grid > .mm-side { grid-column: 1 / -1; } }
+  /* the pile: 26 scripts, one tile each */
+  .mm-pile { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; }
+  .mm-tile { aspect-ratio: 3 / 4; border: 2px solid var(--ink); border-radius: 5px; background: var(--surface); position: relative; display: grid; place-items: end center; padding-bottom: 2px; font: 600 10px var(--ff-mono), monospace; color: var(--muted-foreground); transition: transform 200ms var(--ease-pen), background-color 200ms; }
+  .mm-tile.yours { background: var(--signal-soft); border-color: var(--ink); color: var(--ink); box-shadow: 2px 2px 0 var(--signal); }
+  .mm-tile.yours.filled { background: var(--highlighter); }
+  .mm-tile.unseen { background: var(--tint-blue); border-color: var(--primary); color: var(--primary); }
+  .mm-tile:hover { transform: translateY(-3px) rotate(-2deg); }
+  .mm-tile::before { content: ""; position: absolute; left: 4px; right: 4px; top: 6px; height: 2px; background: currentColor; opacity: .35; box-shadow: 0 5px 0 currentColor, 0 10px 0 currentColor; }
+
+  /* human vs human bars */
+  .mm-bar-track { height: 18px; border: 2px solid var(--ink); border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+  .mm-bar-fill { height: 100%; transform-origin: left; animation: mm-grow 900ms var(--ease-pen) 200ms both; animation-play-state: paused; }
+  .is-in .mm-bar-fill { animation-play-state: running; }
+  @keyframes mm-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  .mm-filter { display: inline-flex; border: 2.5px solid var(--ink); border-radius: 10px; overflow: hidden; background: var(--surface); box-shadow: 3px 3px 0 var(--ink); }
+  .mm-filter button { font: 600 14px var(--ff-mono), monospace; padding: 8px 12px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+  .mm-filter button + button { border-left: 2.5px solid var(--ink); }
+  .mm-filter button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+  /* the workspace grid: question → steps → answers → approve → proof on phones */
+  .mm-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr) 320px; grid-template-areas: "steps q side" "steps answers side"; gap: 28px; align-items: start; }
+  .mm-a-q { grid-area: q; } .mm-a-steps { grid-area: steps; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; } .mm-a-answers { grid-area: answers; } .mm-a-side { grid-area: side; position: sticky; top: 16px; }
+  @media (max-width: 1180px) {
+    .mm-grid { grid-template-columns: 290px minmax(0, 1fr); grid-template-areas: "steps q" "steps answers" "side side"; }
+    .mm-a-side { position: static; }
+  }
+  @media (max-width: 900px) {
+    .mm-hero { grid-template-columns: minmax(0, 1fr); gap: 34px; padding-top: 24px; }
+    .mm-ribbon { grid-template-columns: minmax(0, 1fr); }
+    .mm-ribbon > div + div { border-left: 0; border-top: 2.5px solid var(--ink); }
+    .mm-exhibit-wrap { margin-right: 14px; }
+  }
   @media (max-width: 820px) {
-    .mm-grid { grid-template-columns: minmax(0, 1fr); }
-    .mm-wrap { padding: 16px 16px 48px 60px; }
-    .mm-grid > .mm-steps { order: 2; } .mm-grid > .mm-main { order: 1; } .mm-grid > .mm-side { order: 3; }
+    .mm-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "q" "steps" "answers" "side"; }
+    .mm-a-steps { position: static; max-height: none; overflow: visible; }
+    .mm-wrap { padding: 14px 16px 48px 60px; }
+    .mm-pile { grid-template-columns: repeat(9, minmax(0, 1fr)); }
   }
   @media (max-width: 480px) {
     body { background-image: linear-gradient(90deg, transparent 20px, var(--danger) 20px, var(--danger) 23px, transparent 23px), repeating-linear-gradient(var(--background) 0 35px, var(--border) 35px 36px); }
-    .mm-wrap { padding: 16px 16px 48px 34px; }
-    .mm-circle { font-size: 40px; padding: 2px 10px 6px; }
+    .mm-wrap { padding: 12px 16px 48px 34px; }
+    .mm-bigmark { font-size: 44px; }
+    .mm-exhibit { transform: none; box-shadow: 6px 6px 0 var(--ink); }
+    .mm-exhibit-wrap::before { inset: 8px -4px 64px 8px; }
+    .mm-exhibit-wrap figcaption { margin-top: 40px; }
+    .mm-pile { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .mm-bar .mm-chip { display: none; }
+    .mm-bar .mm-sticker { font-size: 14px; padding: 6px 12px; }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; animation-delay: 0ms !important; }
 }

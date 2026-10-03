@@ -4,7 +4,7 @@
 > Status only: details live in files 01–09. It should be readable in 30 seconds.
 > **Two engines:** 🧠 **COWORK** plans (files 01–06, 08, and the `design/`, `assets/`, `pitch/` folders) · 🛠 **CLAUDE CODE** builds (the app in `web/`, files 07 and 09).
 
-**Last updated:** 3 Oct 2026 18:45 · **by:** B1 build step 0 (Claude Code)
+**Last updated:** 3 Oct 2026 19:20 · **by:** B1 build step 0 (Claude Code)
 
 ## 1. WHERE WE ARE NOW
 - **Engine to use now:** 🛠 CLAUDE CODE
@@ -120,6 +120,7 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 - 3 Oct 16:50 · **Models: free Gemini (primary) + free Groq (fallback), ₹0** · team choice; overrides "paid primary"; the recorded replay is therefore part of the plan; keys untested
 - 3 Oct 18:40 · **Step 0: the sample six = A00, A01, A02, A06, A11, A19 (marks 5/3/4/3/5/4 from grader 1); unseen = the next 10; the typed scheme = the style preview's two criteria** · Claude's call inside 06 §11 (seed data); changeable in `web/lib/demo/sample.ts`
 - 3 Oct 18:40 · **Font licences verified (all SIL OFL 1.1) and logged in `assets/LICENSES.md`**; the ui-critic pass on step 0 was skipped to recover the 41 min (runs in step 1)
+- 3 Oct 19:20 · **`/app` redesigned to be louder and to show the problem without saying it (team lead's call, overrides 05 §10 "≤ 250 ms, state changes only" and 06 "no stat tiles")** · the lead found step 0 too plain. Added: a hero with a real answer two examiners marked 2 apart (switchable cases), a colour ribbon, "the pile" of 26 script tiles, colour-coded role badges and a colour key, a bright highlighter derived from `--signal`, one-shot motion (highlighter sweep, red-pen circles, count-ups when on screen); reduced motion = still. ui-critic run, its 8 P0/P1 fixed. Cost ≈ 40 min out of step 1's slack
 - 2 Oct · **Production deploys only from laptop A's CLI** (Vercel's Git connection is disconnected in B0) · a teammate's push must never redeploy during a freeze
 
 ## 9. Top risks (max 3)
