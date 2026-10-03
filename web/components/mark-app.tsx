@@ -127,6 +127,8 @@ export function MarkApp() {
   }
 
   function start() {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(() => document.getElementById("run")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }), 50);
     setEvents([]);
     setEdits({});
     setNotesDraft([]);
@@ -141,13 +143,13 @@ export function MarkApp() {
 
   function approveScheme() {
     setPhase("marking");
-    setEvents((prev) => [...prev, { type: "step", id: "approve-scheme", role: "HUMAN", label: "You approved the scheme", status: "done" }]);
+    setEvents((prev) => [...prev, { type: "step", id: "approve-scheme", role: "HUMAN", label: notesDraft.length ? `approved · ${notesDraft.length} notes` : "approved · scheme as typed", status: "done" }]);
     void runStage("mark", notesDraft.map((n) => n.trim().slice(0, 200)).filter(Boolean).slice(0, 6));
   }
 
   function approveMarks() {
     setPhase("approved");
-    setEvents((prev) => [...prev, { type: "step", id: "approve", role: "HUMAN", label: "You approved the marks", status: "done" }]);
+    setEvents((prev) => [...prev, { type: "step", id: "approve", role: "HUMAN", label: "approved", status: "done" }]);
   }
 
   function reset() {
@@ -338,12 +340,23 @@ export function MarkApp() {
           )}
 
           {flags.match && (v.rounds.length > 0 || phase === "tuning") && (
-            <div className="mm-card blue mb-6" aria-live="polite">
+            <div id="run" className="mm-card blue mb-6 scroll-mt-4" aria-live="polite">
               <div className="mm-section-h">
                 <h2 className="text-[26px]">Match my marking</h2>
                 <span className="mm-badge AGENT">AGENT</span>
               </div>
               <p className="mm-small mm-muted mt-1 mb-3">It marks your six, compares with your marks, rewrites its notes and tries again. Code keeps a round only if it matches you more.</p>
+              {v.scheme && (
+                <p className="mm-verdict">
+                  {v.scheme.notes.length ? (
+                    <>
+                      ✓ Its notes now match you on {v.scheme.matches} of {v.scheme.of} (was {v.rounds[0]?.matches} of {v.rounds[0]?.of})
+                    </>
+                  ) : (
+                    <>No round matched you better → your scheme stays as typed ({v.scheme.matches} of {v.scheme.of})</>
+                  )}
+                </p>
+              )}
               <ol className="m-0 flex list-none flex-col gap-3 p-0">
                 {v.rounds.map((r) => {
                   const best = kept?.n === r.n;
@@ -362,13 +375,25 @@ export function MarkApp() {
                         <span className="mm-small mm-muted">total gap {r.gap}</span>
                         {best && full && <span className="mm-pen text-[24px]">matches you now!</span>}
                       </div>
-                      {r.notes.length > 0 && (
-                        <ul className="mm-notes">
-                          {r.notes.map((n, i) => (
-                            <li key={i}>{n}</li>
-                          ))}
-                        </ul>
-                      )}
+                      {r.notes.length > 0 &&
+                        (r.kept ? (
+                          <ul className="mm-notes">
+                            {r.notes.map((n, i) => (
+                              <li key={i}>{n}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <details className="mm-details">
+                            <summary>
+                              {r.notes.length} note{r.notes.length > 1 ? "s" : ""} tried
+                            </summary>
+                            <ul className="mm-notes">
+                              {r.notes.map((n, i) => (
+                                <li key={i}>{n}</li>
+                              ))}
+                            </ul>
+                          </details>
+                        ))}
                       {r.dropped.length > 0 && (
                         <ul className="mm-notes dropped">
                           {r.dropped.map((n, i) => (
@@ -435,7 +460,10 @@ export function MarkApp() {
                 <span className="mm-badge CODE">CODE</span>
               </div>
               <p className="mm-small mt-1 mb-0">
-                {sampleClass.answers.find((a) => a.id === planted.answerId)?.label}: <s>“{planted.quote}”</s> is not in the answer → mark thrown out → re-asked once
+                <a className="mm-anchor" href={`#ans-${planted.answerId}`}>
+                  {sampleClass.answers.find((a) => a.id === planted.answerId)?.label}
+                </a>
+                : <s>“{planted.quote}”</s> is not in the answer → mark thrown out → re-asked once
                 {finalMarks[planted.answerId] ? <span className="mm-ok"> → ✓ fixed on try 2</span> : <span className="mm-bad"> → sent to you unmarked</span>}
               </p>
             </div>
@@ -468,10 +496,14 @@ export function MarkApp() {
               const thrown = k === "unseen" && !tool && rej.some((r) => r.final);
               const edit = edits[a.id];
               const edited = tool && edit !== undefined && edit !== "" && Number(edit) !== tool.total;
+              const real = sampleClass.answers.find((x) => x.id === a.id)!.grader1;
+              const miss = k === "unseen" && tool && showReal && tool.total !== real;
+              const caught = rej.some((r) => r.planted) && !!tool;
               return (
-                <li key={a.id} className={`mm-card ${k}`}>
+                <li key={a.id} id={`ans-${a.id}`} className={`mm-card ${k}${miss ? " miss" : ""}${caught ? " caught" : ""} scroll-mt-4`}>
                   {k === "yours" && <span className="mm-stamp yellow">YOU MARK THIS</span>}
-                  {k === "unseen" && tool && <span className="mm-stamp green">{phase === "approved" ? "APPROVED" : "CHECKED ✓"}</span>}
+                  {k === "unseen" && tool && !caught && <span className="mm-stamp green">{phase === "approved" ? "APPROVED" : "CHECKED ✓"}</span>}
+                  {caught && <span className="mm-stamp">CAUGHT ✗ → FIXED ✓</span>}
                   {thrown && <span className="mm-stamp">THROWN OUT · TO YOU</span>}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                     <div className="min-w-0">
@@ -505,8 +537,15 @@ export function MarkApp() {
                         </ul>
                       )}
                       {rej.map((r, i) => (
-                        <p key={i} className="mm-small mm-bad mt-2 mb-0">
-                          ✗ Try {r.attempt} thrown out{r.planted ? " (planted by Break it)" : ""}: {r.reason}
+                        <p key={i} className="mm-reject">
+                          ✗ Try {r.attempt} thrown out{r.planted ? " (planted by Break it)" : ""}:{" "}
+                          {r.quote ? (
+                            <>
+                              <s>“{r.quote}”</s> is not in the answer
+                            </>
+                          ) : (
+                            r.reason
+                          )}
                         </p>
                       ))}
                     </div>
@@ -535,9 +574,11 @@ export function MarkApp() {
                     )}
                     {k === "unseen" && tool && (
                       <div className="flex shrink-0 flex-row items-end gap-4 self-end sm:flex-col sm:items-center sm:gap-2">
-                        <span className="mm-bigmark" aria-label={`Tool's mark ${tool.total} of ${max}`}>
-                          {edited ? edit : tool.total}
-                        </span>
+                        <PenCircle delay={0}>
+                          <span className="mm-bigmark" aria-label={`Tool's mark ${edited ? edit : tool.total} of ${max}`}>
+                            {edited ? edit : tool.total}
+                          </span>
+                        </PenCircle>
                         {phase === "review" ? (
                           <label className="flex items-center gap-1">
                             <span className="mm-small">edit</span>
@@ -552,8 +593,9 @@ export function MarkApp() {
                         ) : null}
                         {edited && <span className="mm-tag mm-bad">EDITED BY YOU</span>}
                         {showReal && (
-                          <span className="mm-small mm-muted text-center">
-                            real mark {sampleClass.answers.find((x) => x.id === a.id)!.grader1}
+                          <span className="mm-small text-center">
+                            real mark <b className="mm-mono">{real}</b>{" "}
+                            {miss ? <span className="mm-bad">✗ {Math.abs(tool.total - real)} off</span> : <span className="mm-ok">✓ same</span>}
                           </span>
                         )}
                       </div>
@@ -591,9 +633,11 @@ export function MarkApp() {
                           : "No marks yet: run the marking first."}
                   </span>
                 </p>
-                <button type="button" className="mm-btn" disabled={phase !== "review"} onClick={approveMarks}>
-                  Approve marks{editedCount ? ` (${editedCount} edited)` : ""}
-                </button>
+                {phase === "review" && (
+                  <button type="button" className="mm-btn" onClick={approveMarks}>
+                    Approve {Object.keys(finalMarks).length} marks{editedCount ? ` (${editedCount} edited)` : ""}
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -608,23 +652,23 @@ export function MarkApp() {
                   {v.agreement.after ? (
                     <>
                       <span className="mm-small">before</span>
-                      <span className="mm-num text-[34px]">{v.agreement.before.exact}</span>
+                      <span className="mm-num text-[44px]">{v.agreement.before.exact}</span>
                       <span className="mm-small">→ after</span>
-                      <span className="mm-num text-[34px]" style={{ color: "var(--primary)" }}>
+                      <span className="mm-num text-[64px]" style={{ color: "var(--primary)" }}>
                         {v.agreement.after.exact}
                       </span>
                       <span className="mm-small">of {v.agreement.after.n}</span>
                     </>
                   ) : (
                     <>
-                      <span className="mm-num text-[34px]" style={{ color: "var(--primary)" }}>
+                      <span className="mm-num text-[64px]" style={{ color: "var(--primary)" }}>
                         {v.agreement.before.exact}
                       </span>
-                      <span className="mm-small">of {v.agreement.before.n} · scheme as typed</span>
+                      <span className="mm-small">of {v.agreement.before.n} · you vs this tool</span>
                     </>
                   )}
                   <div className="mm-small mm-muted w-full">
-                    within one mark: {(v.agreement.after ?? v.agreement.before).withinOne} of {(v.agreement.after ?? v.agreement.before).n} · one question, this run
+                    two trained examiners: 5.7 of 10 · within one mark: {(v.agreement.after ?? v.agreement.before).withinOne} of {(v.agreement.after ?? v.agreement.before).n} · one question, this run
                   </div>
                 </div>
               ) : (
@@ -634,15 +678,26 @@ export function MarkApp() {
               )}
             </div>
             {usage.calls > 0 && (
-              <div className="mm-mono mm-small mt-3">
-                {usage.seconds.toFixed(1)} s · {usage.calls} model calls · {usage.tokens.toLocaleString("en-IN")} tokens · {usage.model}
-                {usage.fallback ? " · fallback used" : ""} · ₹0 (free tier)
-              </div>
+              <dl className="mm-usage">
+                <dt>time</dt>
+                <dd>{usage.seconds.toFixed(1)} s</dd>
+                <dt>model calls</dt>
+                <dd>{usage.calls}</dd>
+                <dt>tokens</dt>
+                <dd>{usage.tokens.toLocaleString("en-IN")}</dd>
+                <dt>model</dt>
+                <dd>
+                  {usage.model}
+                  {usage.fallback ? " (fallback used)" : ""}
+                </dd>
+                <dt>cost</dt>
+                <dd>₹0 · free tier</dd>
+              </dl>
             )}
             <p className="mm-small mm-muted mt-4 mb-2">How often two trained examiners agree, on 2,442 real answers:</p>
             <div className="flex items-baseline justify-between">
               <span className="mm-small">same mark</span>
-              <span className="mm-num text-[34px]">
+              <span className="mm-num text-[26px]">
                 <CountUp value={56.8} decimals={1} suffix="%" />
               </span>
             </div>
@@ -651,7 +706,7 @@ export function MarkApp() {
             </div>
             <div className="mt-3 flex items-baseline justify-between">
               <span className="mm-small">within one mark</span>
-              <span className="mm-num text-[34px]">
+              <span className="mm-num text-[26px]">
                 <CountUp value={78} decimals={1} suffix="%" />
               </span>
             </div>

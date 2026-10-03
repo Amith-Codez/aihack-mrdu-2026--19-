@@ -113,7 +113,7 @@
   .mm-tag { display: inline-block; font: 600 11px/1 var(--ff-mono), monospace; letter-spacing: .06em; padding: 5px 7px; border-radius: 6px; border: 2px solid currentColor; white-space: nowrap; }
 
   /* steps rail */
-  .mm-step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; padding: 12px 0; border-bottom: 2px dotted var(--border-strong); }
+  .mm-step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; padding: 9px 0; border-bottom: 2px dotted var(--border-strong); }
   .mm-step:last-child { border-bottom: 0; }
   .mm-stepnum { width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--ink); display: grid; place-items: center; font: 600 13px var(--ff-mono), monospace; background: var(--surface); }
   .mm-step.is-done .mm-stepnum { background: var(--success); color: var(--surface); border-color: var(--ink); }
@@ -186,6 +186,16 @@
   .mm-notebox { flex: 1; min-width: 0; font: 400 15px/1.4 var(--ff-text), sans-serif; padding: 8px 10px; border: 2px solid var(--ink); border-radius: 8px; background: var(--surface); color: var(--foreground); resize: vertical; }
   .mm-markbox.small { width: 48px; font-size: 18px; padding: 4px 2px; box-shadow: 2px 2px 0 var(--danger); }
   .mm-tile.unseen.marked { background: var(--success); color: var(--surface); border-color: var(--ink); }
+  .mm-verdict { font-weight: 600; border-left: 4px solid var(--primary); padding: 4px 10px; margin: 0 0 12px; background: var(--tint-blue); }
+  .mm-details summary { cursor: pointer; font: 600 14px var(--ff-mono), monospace; margin-top: 6px; }
+  .mm-reject { font-size: 18px; color: var(--danger); font-weight: 600; margin: 8px 0 0; }
+  .mm-anchor { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  .mm-card.miss { border-color: var(--danger); box-shadow: 6px 6px 0 var(--danger); }
+  .mm-card.caught { border-color: var(--danger); box-shadow: 6px 6px 0 var(--danger); }
+  .mm-card:target { outline: 4px solid var(--signal); outline-offset: 4px; }
+  .mm-usage { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; margin: 12px 0 0; font-size: 15px; }
+  .mm-usage dt { color: var(--muted-foreground); }
+  .mm-usage dd { margin: 0; font-family: var(--ff-mono), monospace; overflow-wrap: anywhere; }
   @media (prefers-reduced-motion: reduce) { .mm-round { transition: none; } }
 
   /* the workspace grid: question → steps → answers → approve → proof on phones */

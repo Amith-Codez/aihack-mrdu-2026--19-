@@ -183,16 +183,16 @@ async function callNotes(ctx: Ctx, six: Answer[], marks: Map<string, AnswerMark 
 async function tune(ctx: Ctx) {
   const { req, emit } = ctx;
   const six = req.answers.filter((a) => req.teacherMarks.some((t) => t.answerId === a.id));
-  emit({ type: "step", id: "split", role: "CODE", label: `Split the class: your ${six.length} + ${(req.heldOutMarks ?? []).length} unseen`, status: "done" });
+  emit({ type: "step", id: "split", role: "CODE", label: `your ${six.length} + ${(req.heldOutMarks ?? []).length} unseen`, status: "done" });
   if (six.length < 2) throw new Error("Mark at least two answers yourself first.");
 
-  emit({ type: "step", id: "match", role: "AGENT", label: "Match my marking: marking your six", status: "running" });
+  emit({ type: "step", id: "match", role: "AGENT", label: "marking your six", status: "running" });
   let bestMarks = await markAll(ctx, six, [], "six", { round: 0, batchSize: 6 });
   let best = { ...compare(bestMarks, req.teacherMarks), notes: [] as string[] };
   emit({ type: "round", n: 0, matches: best.exact, of: six.length, gap: best.gap, notes: [], dropped: [], kept: true });
 
   for (let n = 1; n <= MAX_ROUNDS && best.exact < six.length; n++) {
-    emit({ type: "step", id: "match", role: "AGENT", label: `Match my marking: round ${n} of ${MAX_ROUNDS}, rewriting its notes`, status: "running" });
+    emit({ type: "step", id: "match", role: "AGENT", label: `round ${n} of ${MAX_ROUNDS}: rewriting its notes`, status: "running" });
     const proposal = await callNotes(ctx, six, bestMarks, best.notes);
     const texts = six.map((a) => a.text);
     const bad = (s: string) => copiesAnswer(s, texts) || overAwards(s, req.scheme);
@@ -211,9 +211,9 @@ async function tune(ctx: Ctx) {
       bestMarks = marks;
     }
   }
-  emit({ type: "step", id: "match", role: "AGENT", label: `Match my marking: matches you on ${best.exact} of ${six.length}`, status: "done" });
+  emit({ type: "step", id: "match", role: "AGENT", label: `matches you on ${best.exact} of ${six.length}${best.notes.length ? "" : " · scheme as typed"}`, status: "done" });
   emit({ type: "scheme", notes: best.notes, matches: best.exact, of: six.length });
-  emit({ type: "step", id: "approve-scheme", role: "HUMAN", label: "You approve the scheme", status: "running" });
+  emit({ type: "step", id: "approve-scheme", role: "HUMAN", label: "waiting for you", status: "running" });
 }
 
 /** Stage "mark": mark the unseen with the scheme as typed (before) and with the approved notes (after); compare with her real marks. */
@@ -224,25 +224,26 @@ async function mark(ctx: Ctx) {
   const targets = unseen.length ? unseen : req.answers.filter((a) => !req.teacherMarks.some((t) => t.answerId === a.id));
   const tuned = req.matchEnabled && req.notes.length > 0;
 
-  emit({ type: "step", id: "mark", role: "MODEL", label: `Mark ${targets.length} answers, ${BATCH} per call`, status: "running" });
-  emit({ type: "step", id: "checks", role: "CODE", label: "Hard checks: quote is in the answer · marks add up", status: "running" });
+  emit({ type: "step", id: "mark", role: "MODEL", label: `${targets.length} answers, ${BATCH} per call`, status: "running" });
+  emit({ type: "step", id: "checks", role: "CODE", label: "checking every quote", status: "running" });
   // One phase after the other, so at most PARALLEL calls run at once (free-tier limits).
   const before = await markAll(ctx, targets, [], "before", { plant: req.breakIt && !tuned });
   const after = tuned ? await markAll(ctx, targets, req.notes, "after", { plant: req.breakIt }) : null;
-  emit({ type: "step", id: "mark", role: "MODEL", label: `Marked ${targets.length} answers`, status: "done" });
-  emit({ type: "step", id: "checks", role: "CODE", label: "Hard checks: quote is in the answer · marks add up", status: "done" });
+  emit({ type: "step", id: "mark", role: "MODEL", label: `${targets.length} marked${tuned ? " twice (before + after)" : ""}`, status: "done" });
+  emit({ type: "step", id: "checks", role: "CODE", label: "every mark checked", status: "done" });
 
   if (held.length) {
-    emit({ type: "step", id: "agreement", role: "CODE", label: "Compare with your real marks", status: "running" });
+    emit({ type: "step", id: "agreement", role: "CODE", label: "comparing", status: "running" });
     const b = compare(before, held);
     emit({ type: "agreement", phase: "before", exact: b.exact, withinOne: b.withinOne, n: b.n });
     if (after) {
       const a = compare(after, held);
       emit({ type: "agreement", phase: "after", exact: a.exact, withinOne: a.withinOne, n: a.n });
     }
-    emit({ type: "step", id: "agreement", role: "CODE", label: "Compare with your real marks", status: "done" });
+    const last = after ? compare(after, held) : b;
+    emit({ type: "step", id: "agreement", role: "CODE", label: `${last.exact} of ${last.n} same as your real marks`, status: "done" });
   }
-  emit({ type: "step", id: "approve", role: "HUMAN", label: "You approve the marks", status: "running" });
+  emit({ type: "step", id: "approve", role: "HUMAN", label: "waiting for you", status: "running" });
 }
 
 export async function runEngine(req: RunRequest, emit: Emit, signal?: AbortSignal) {

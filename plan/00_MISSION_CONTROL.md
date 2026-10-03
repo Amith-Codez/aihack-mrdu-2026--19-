@@ -4,7 +4,7 @@
 > Status only: details live in files 01–09. It should be readable in 30 seconds.
 > **Two engines:** 🧠 **COWORK** plans (files 01–06, 08, and the `design/`, `assets/`, `pitch/` folders) · 🛠 **CLAUDE CODE** builds (the app in `web/`, files 07 and 09).
 
-**Last updated:** 3 Oct 2026 19:55 · **by:** B2 build step 1 (Claude Code)
+**Last updated:** 3 Oct 2026 20:15 · **by:** B2 build step 1 (Claude Code)
 
 ## 1. WHERE WE ARE NOW
 - **Engine to use now:** 🛠 CLAUDE CODE
@@ -79,7 +79,7 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 | # | Goal | Status | Live URL updated? | Tag |
 |---|---|---|---|---|
 | 0 | Skeleton: tokens, four fonts, `/app` shell with the sample class (26 real answers), `/` → `/app` (307), contracts, flags | DONE-TESTED (build + lint clean; 1440/768/390 checked, no overflow, no console errors) | Yes, 18:40 | ok-1840 = B0 state before step 0 |
-| 1 | Key test → hero path on the mock → Break it → one real run | DONE-TESTED (keys: Gemini 3.8 Flash overloaded → 3.5 Flash-Lite OK, Groq OK; mock run and 2 real runs on the live URL; build + lint clean; 1440/768/390 no overflow; 0 console errors) | Yes, 19:45 | ok-1930 before; ok-1955 after |
+| 1 | Key test → hero path on the mock → Break it → one real run | DONE-TESTED (keys: Gemini 3.8 Flash overloaded → 3.5 Flash-Lite OK, Groq OK; mock run and 2 real runs on the live URL; build + lint clean; 1440/768/390 no overflow; 0 console errors) | Yes, 20:12 | ok-1930 before; ok-2015 after |
 | 2 | MVP: real mechanism, approve, before/after, fallback, 3 replays | NOT STARTED | — | — |
 
 **Features shown in a round (≤ 6, only DONE-TESTED)** *(from 04 §22)*
@@ -124,6 +124,7 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 - 3 Oct 19:50 · **Primary model = `gemini-3.5-flash-lite`** (key test: 3.8 Flash answered "high demand", 3.5 Flash ran out of free quota after 4 calls; Flash-Lite ran a full hero run in 16 s) · Claude's call under 06 §11; set in `.env.local` and on Vercel
 - 3 Oct 19:50 · **The run is two requests: `stage: "tune"` then `stage: "mark"`**, with the teacher's approval of the notes in between (answers the 18:45 question); added a `scheme` event and `rejected.planted`; a code rule also drops notes that award more than a criterion's points
 - 3 Oct 19:50 · **The 10 answers that are neither six nor unseen are "not in this run"** (labelled on their cards) · keeps a hero run to ~8 calls on free tiers; marking them is step 4 work if wanted
+- 3 Oct 20:15 · **ui-critic after step 1: 4 P0 + 6 P1; fixed all 4 P0s and P1s 6, 7, 8, 9 (circled mark only), 10; the rail now fits at 900 px.** Still open: P1 5 (rail highlight follows the running step), P1 7 sticky approve bar on phones, P1 9 edit box behind a tap, P2 11–13
 - 3 Oct 19:50 · **Break it is ticked by default** · the planned sad path shows in every demo run; untick for a clean run
 - 2 Oct · **Production deploys only from laptop A's CLI** (Vercel's Git connection is disconnected in B0) · a teammate's push must never redeploy during a freeze
 
@@ -133,4 +134,4 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 - A small team (advice: 5) and a beginner builder being asked how the tech works → explain-it drills, `plan/EXPLAIN.md`, the smallest architecture that runs the hero path
 
 ## 10. Links
-Repo git@github.com:Amith-Codez/aihack-mrdu-2026--19-.git (https://github.com/Amith-Codez/aihack-mrdu-2026--19-) · Live URL (the stable production alias) https://aihack-mrdu-2026-19.vercel.app · Last good deployment https://aihack-mrdu-2026-19-nbsk2crd6-amith6.vercel.app (step 1 hero path, 3 Oct 19:45) · Last good tag ok-1955 (step 1) · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon
+Repo git@github.com:Amith-Codez/aihack-mrdu-2026--19-.git (https://github.com/Amith-Codez/aihack-mrdu-2026--19-) · Live URL (the stable production alias) https://aihack-mrdu-2026-19.vercel.app · Last good deployment https://aihack-mrdu-2026-19-dzlkv1kcw-amith6.vercel.app (step 1 + ui-critic fixes, 3 Oct 20:12) · Last good tag ok-2015 (step 1 final) · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon
