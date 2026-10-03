@@ -4,12 +4,12 @@
 > Status only: details live in files 01–09. It should be readable in 30 seconds.
 > **Two engines:** 🧠 **COWORK** plans (files 01–06, 08, and the `design/`, `assets/`, `pitch/` folders) · 🛠 **CLAUDE CODE** builds (the app in `web/`, files 07 and 09).
 
-**Last updated:** 3 Oct 2026 20:15 · **by:** B2 build step 1 (Claude Code)
+**Last updated:** 3 Oct 2026 22:00 · **by:** B2 build step 2 + PDF upload (Claude Code)
 
 ## 1. WHERE WE ARE NOW
 - **Engine to use now:** 🛠 CLAUDE CODE
 - **Step:** build step 1 DONE-TESTED (G4 done 19:50, 25 min early). The hero path streams on the live URL with the real model; Break it is caught and fixed; the fallback took over live once
-- **Next action (one):** `/clear`, then paste **B2** for build step 2 (MVP). First job: make Match my marking actually raise matches on the real model before the **21:15 checkpoint** (today it stays at 4 of 6)
+- **Next action (one):** finish the rest of step 2 for G5: hard-checks script (5 good / 5 bad), 3 recorded replays, local fallback test, 3 clean hero runs, tag `ok-mvp`
 - **Blocker:** none. Risk: Gemini's free quota runs out after ~2 runs in a few minutes (Groq then carries the run); the recorded replays in step 2 are essential
 
 ## 2. Event
@@ -85,7 +85,8 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 **Features shown in a round (≤ 6, only DONE-TESTED)** *(from 04 §22)*
 | Feature | Kind (HERO / TOP 3 / SHOWN / PARKED) | Status | Flag | Fallback tested? |
 |---|---|---|---|---|
-| Match my marking (K4) | HERO · TOP 3 | PARTIAL (runs 2 rounds live with code checks on the notes; does not yet raise matches: 4 of 6 → 4 of 6) | `MATCH_ENABLED` | — |
+| Match my marking (K4) | HERO · TOP 3 | DONE-TESTED (live 21:55: sample class 2 → 5 of 6, unseen 6 → 8 of 10 (CLI 21:45); uploaded PDF 3 → 6 of 6) | `MATCH_ENABLED` | Groq fallback |
+| Upload a PDF of answer scripts (team lead's request, 3 Oct 21:40) | SHOWN (replaces "paste a whole class") | DONE-TESTED (live 21:55: 20 of 20 answers found word for word in 5 s; full flow 9 s; not-a-PDF and broken-PDF errors shown) | — | fixed-rule parser if both models fail |
 | Quoted marks + hard checks + Break it (K2, K3) | TOP 3 | DONE-TESTED (live, 19:45: Break it thrown out → fixed on try 2; checks script in step 2) | — | Groq fallback took over live once |
 | Class mistake map (W2) | TOP 3 (after round 1) | NOT STARTED | — | — |
 | Review and approve (K5) | SHOWN | DONE-UNTESTED (approve scheme with edits, edit a mark, approve marks) | — | — |
@@ -124,6 +125,8 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 - 3 Oct 19:50 · **Primary model = `gemini-3.5-flash-lite`** (key test: 3.8 Flash answered "high demand", 3.5 Flash ran out of free quota after 4 calls; Flash-Lite ran a full hero run in 16 s) · Claude's call under 06 §11; set in `.env.local` and on Vercel
 - 3 Oct 19:50 · **The run is two requests: `stage: "tune"` then `stage: "mark"`**, with the teacher's approval of the notes in between (answers the 18:45 question); added a `scheme` event and `rejected.planted`; a code rule also drops notes that award more than a criterion's points
 - 3 Oct 19:50 · **The 10 answers that are neither six nor unseen are "not in this run"** (labelled on their cards) · keeps a hero run to ~8 calls on free tiers; marking them is step 4 work if wanted
+- 3 Oct 21:45 · **Typed scheme for the sample class = one criterion, the dataset's own reference answer (5 marks)** · with two criteria the teacher's 3s and 4s were already covered, so tuning had nothing to learn (4 → 4 of 6); now the real model goes 2 → 5 of 6 on her six and 6 → 8 of 10 on the unseen [M CLI run 21:45]
+- 3 Oct 21:40 · **New feature by the team lead: upload a PDF of answer scripts** (one question per PDF; she marks the first six; the rest are marked with the approved notes; no before/after because the PDF has no real marks). One in, one out: it replaces "paste a whole class" (step 4). New package `unpdf` 1.8.1 (text from PDFs, server only). Sample PDF `web/public/samples/class-test-infix.pdf` = Mohler E08.Q06, 20 real answers
 - 3 Oct 20:15 · **ui-critic after step 1: 4 P0 + 6 P1; fixed all 4 P0s and P1s 6, 7, 8, 9 (circled mark only), 10; the rail now fits at 900 px.** Still open: P1 5 (rail highlight follows the running step), P1 7 sticky approve bar on phones, P1 9 edit box behind a tap, P2 11–13
 - 3 Oct 19:50 · **Break it is ticked by default** · the planned sad path shows in every demo run; untick for a clean run
 - 2 Oct · **Production deploys only from laptop A's CLI** (Vercel's Git connection is disconnected in B0) · a teammate's push must never redeploy during a freeze
@@ -134,4 +137,4 @@ Hours (revised 3 Oct 16:50): core loop **4.5 h** (steps 1–2, 18:00–22:30; wa
 - A small team (advice: 5) and a beginner builder being asked how the tech works → explain-it drills, `plan/EXPLAIN.md`, the smallest architecture that runs the hero path
 
 ## 10. Links
-Repo git@github.com:Amith-Codez/aihack-mrdu-2026--19-.git (https://github.com/Amith-Codez/aihack-mrdu-2026--19-) · Live URL (the stable production alias) https://aihack-mrdu-2026-19.vercel.app · Last good deployment https://aihack-mrdu-2026-19-dzlkv1kcw-amith6.vercel.app (step 1 + ui-critic fixes, 3 Oct 20:12) · Last good tag ok-2015 (step 1 final) · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon
+Repo git@github.com:Amith-Codez/aihack-mrdu-2026--19-.git (https://github.com/Amith-Codez/aihack-mrdu-2026--19-) · Live URL (the stable production alias) https://aihack-mrdu-2026-19.vercel.app · Last good deployment https://aihack-mrdu-2026-19-e00s85g3c-amith6.vercel.app (PDF upload + one-criterion scheme, 3 Oct 21:55) · Last good tag ok-2200 (PDF upload) · Backup video — · Deck — · Submission page — · Registration: https://app.studenttribe.in/events/ai-hack-x-mrdu-hackathon

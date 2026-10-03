@@ -196,6 +196,10 @@
   .mm-usage { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; margin: 12px 0 0; font-size: 15px; }
   .mm-usage dt { color: var(--muted-foreground); }
   .mm-usage dd { margin: 0; font-family: var(--ff-mono), monospace; overflow-wrap: anywhere; }
+  .mm-upload { border: 2.5px dashed var(--ink); border-radius: 12px; padding: 12px 14px; background: var(--tint-yellow); }
+  .mm-btn.small { font-size: 17px; padding: 9px 16px; box-shadow: 4px 4px 0 var(--foreground); }
+  .mm-btn.is-disabled { opacity: .55; pointer-events: none; }
+  .mm-btn:has(input:focus-visible) { outline: 3px solid var(--primary); outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) { .mm-round { transition: none; } }
 
   /* the workspace grid: question → steps → answers → approve → proof on phones */

@@ -18,10 +18,9 @@ export const sampleClass = {
   referenceAnswer: q.referenceAnswer,
   maxMarks: q.maxMarks,
   // The scheme as the teacher typed it (style preview, 05). Totals are capped at maxMarks.
-  scheme: [
-    { id: "c1", text: "Names the extra space needed for the back pointers", points: 5 },
-    { id: "c2", text: "Only says insertion or deletion is harder", points: 3 },
-  ] satisfies Criterion[],
+  // The scheme as typed = the dataset's own reference answer, one criterion. The teacher's partial credit
+  // (3s and 4s for "insertion/deletion is harder") is what Match my marking has to learn from her six.
+  scheme: [{ id: "c1", text: "Names the extra space needed to store the back pointers", points: 5 }] satisfies Criterion[],
   answers: q.answers.map((a, i) => ({
     id: a.id,
     text: a.text,
@@ -59,5 +58,77 @@ export function heroRequest(o: { stage: "tune" | "mark"; breakIt: boolean; notes
     matchEnabled: o.matchEnabled ?? true,
     stage: o.stage,
     notes: o.notes ?? [],
+  };
+}
+
+/** A class on screen: the sample, or one read from an uploaded PDF. `real` = a real grader's mark, when we have one. */
+export type ClassData = {
+  id: string;
+  source: "sample" | "pdf";
+  title: string;
+  question: string;
+  maxMarks: number;
+  scheme: Criterion[];
+  schemeNote: string;
+  answers: { id: string; label: string; text: string; real?: number; inPdf?: boolean }[];
+  sixIds: string[];
+  unseenIds: string[];
+};
+
+export const sampleData: ClassData = {
+  id: sampleClass.id,
+  source: "sample",
+  title: "SAMPLE CLASS · DATA STRUCTURES · QUESTION 7",
+  question: sampleClass.question,
+  maxMarks: sampleClass.maxMarks,
+  scheme: sampleClass.scheme,
+  schemeNote: "Your marking scheme",
+  answers: sampleClass.answers.map((a) => ({ id: a.id, label: a.label, text: a.text, real: a.grader1 })),
+  sixIds: SIX_IDS,
+  unseenIds: UNSEEN_IDS,
+};
+
+/** Her first six marked by her; with an uploaded class, every other answer is marked by the tool. */
+export function classFromPdf(x: {
+  title: string;
+  question: string;
+  maxMarks: number;
+  scheme: { text: string; points: number }[];
+  schemeFrom: string;
+  answers: { label: string; text: string; inPdf: boolean }[];
+}): ClassData {
+  const answers = x.answers.map((a, i) => ({ id: `P${String(i + 1).padStart(2, "0")}`, label: a.label, text: a.text, inPdf: a.inPdf }));
+  const six = Math.min(6, Math.max(2, answers.length - 1));
+  return {
+    id: `pdf-${Date.now()}`,
+    source: "pdf",
+    title: `FROM YOUR PDF · ${x.title.toUpperCase().slice(0, 60)}`,
+    question: x.question,
+    maxMarks: x.maxMarks,
+    scheme: x.scheme.map((c, i) => ({ id: `c${i + 1}`, text: c.text, points: Math.min(c.points, x.maxMarks) })),
+    schemeNote: x.schemeFrom === "scheme" ? "Marking scheme from your PDF" : x.schemeFrom === "model answer" ? "Scheme made from the model answer in your PDF" : "Scheme made from the question (no model answer in the PDF)",
+    answers,
+    sixIds: answers.slice(0, six).map((a) => a.id),
+    unseenIds: answers.slice(six).map((a) => a.id),
+  };
+}
+
+/** The /api/run body for any class. */
+export function buildRequest(cls: ClassData, o: { stage: "tune" | "mark"; breakIt: boolean; notes: string[]; teacherMarks: TeacherMark[]; matchEnabled: boolean }) {
+  const ids = [...cls.sixIds, ...cls.unseenIds];
+  return {
+    question: cls.question,
+    maxMarks: cls.maxMarks,
+    scheme: cls.scheme,
+    answers: cls.answers.filter((a) => ids.includes(a.id)).map(({ id, text }) => ({ id, text })),
+    teacherMarks: o.teacherMarks,
+    heldOutMarks: cls.unseenIds.flatMap((id) => {
+      const real = cls.answers.find((a) => a.id === id)?.real;
+      return real === undefined ? [] : [{ answerId: id, mark: real }];
+    }),
+    breakIt: o.breakIt,
+    matchEnabled: o.matchEnabled,
+    stage: o.stage,
+    notes: o.notes,
   };
 }

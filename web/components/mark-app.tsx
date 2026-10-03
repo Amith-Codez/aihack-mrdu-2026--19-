@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
-import { SIX_IDS, SOURCE_LINE, UNSEEN_IDS, heroRequest, sampleClass } from "@/lib/demo/sample";
+import { SOURCE_LINE, buildRequest, classFromPdf, sampleData, type ClassData } from "@/lib/demo/sample";
 import { defaultFlags } from "@/lib/flags";
 import { keptRound, project, readNdjson, type View } from "@/lib/project";
 import { RunEvent, type AnswerMark, type Role } from "@/lib/types";
@@ -13,13 +13,13 @@ type RailStep = { id: string; role: Role; label: string; note: string; match?: b
 
 // The named steps of the hero run (06 §7). Status comes from the real events.
 const RAIL: RailStep[] = [
-  { id: "split", role: "CODE", label: "Split the class", note: "your six + 10 unseen to test on" },
+  { id: "split", role: "CODE", label: "Split the class", note: "your six + the rest" },
   { id: "six", role: "HUMAN", label: "You mark six answers", note: "" },
   { id: "match", role: "AGENT", label: "Match my marking", note: "rewrites its notes, at most 2 rounds, keeps a round only if it matches you more", match: true },
   { id: "approve-scheme", role: "HUMAN", label: "You approve the scheme", note: "nothing is marked with it before", match: true },
   { id: "mark", role: "MODEL", label: "Mark the unseen answers", note: "5 answers per call, a quote for every mark" },
   { id: "checks", role: "CODE", label: "Hard checks", note: "quote is really in the answer · marks add up" },
-  { id: "agreement", role: "CODE", label: "Compare with your real marks", note: "on the 10 it had not seen" },
+  { id: "agreement", role: "CODE", label: "Compare with your real marks", note: "on answers it had not seen" },
   { id: "approve", role: "HUMAN", label: "You approve the marks", note: "edit any mark first" },
 ];
 
@@ -31,6 +31,9 @@ const LEGEND = [
 ];
 
 type Filter = "all" | "six" | "unseen";
+type Upload = { state: "idle" } | { state: "reading"; name: string } | { state: "done"; name: string; found: number; inPdf: number; how: string; model: string } | { state: "error"; message: string };
+
+const initialSix = (c: ClassData) => Object.fromEntries(c.sixIds.map((id) => [id, c.answers.find((a) => a.id === id)?.real?.toString() ?? ""]));
 type Phase = "idle" | "tuning" | "approve-scheme" | "marking" | "review" | "approved" | "error";
 
 const parseEvent = (x: unknown) => {
@@ -64,11 +67,16 @@ function withQuotes(text: string, quotes: string[]): ReactNode {
 }
 
 export function MarkApp() {
-  const max = sampleClass.maxMarks;
   const flags = defaultFlags;
-  const [six, setSix] = useState<Record<string, string>>(() =>
-    Object.fromEntries(SIX_IDS.map((id) => [id, String(sampleClass.answers.find((a) => a.id === id)!.grader1)])),
-  );
+  const [cls, setCls] = useState<ClassData>(sampleData);
+  const [upload, setUpload] = useState<Upload>({ state: "idle" });
+  const max = cls.maxMarks;
+  const SIX_IDS = cls.sixIds;
+  const UNSEEN_IDS = cls.unseenIds;
+  const nSix = SIX_IDS.length;
+  const nUnseen = UNSEEN_IDS.length;
+  const hasReal = UNSEEN_IDS.some((id) => cls.answers.find((a) => a.id === id)?.real !== undefined);
+  const [six, setSix] = useState<Record<string, string>>(() => initialSix(sampleData));
   const [filter, setFilter] = useState<Filter>("all");
   const [events, setEvents] = useState<RunEvent[]>([]);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -91,14 +99,14 @@ export function MarkApp() {
   const showReal = v.agreement.before !== undefined;
 
   const kind = (id: string) => (SIX_IDS.includes(id) ? "yours" : UNSEEN_IDS.includes(id) ? "unseen" : "rest");
-  const shown = sampleClass.answers.filter((a) => filter === "all" || kind(a.id) === (filter === "six" ? "yours" : "unseen"));
+  const shown = cls.answers.filter((a) => filter === "all" || kind(a.id) === (filter === "six" ? "yours" : "unseen"));
 
   async function runStage(stage: "tune" | "mark", notes: string[]) {
     abort.current?.abort();
     const ctl = new AbortController();
     abort.current = ctl;
     const teacherMarks = SIX_IDS.map((id) => ({ answerId: id, mark: Number(six[id]) }));
-    const body = heroRequest({ stage, breakIt, notes, teacherMarks, matchEnabled: flags.match });
+    const body = buildRequest(cls, { stage, breakIt, notes, teacherMarks, matchEnabled: flags.match });
     let sawScheme = false;
     let sawError = false;
     try {
@@ -152,6 +160,49 @@ export function MarkApp() {
     setEvents((prev) => [...prev, { type: "step", id: "approve", role: "HUMAN", label: "approved", status: "done" }]);
   }
 
+  function loadClass(c: ClassData) {
+    abort.current?.abort();
+    setCls(c);
+    setSix(initialSix(c));
+    setEvents([]);
+    setEdits({});
+    setNotesDraft([]);
+    setFilter("all");
+    setPhase("idle");
+  }
+
+  async function uploadPdf(file: File) {
+    if (file.size > 4 * 1024 * 1024) return setUpload({ state: "error", message: "The PDF is larger than 4 MB." });
+    setUpload({ state: "reading", name: file.name });
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/extract", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `The server answered ${res.status}`);
+      const c = classFromPdf(data.cls);
+      if (c.answers.length < 3) throw new Error(`Only ${c.answers.length} answer${c.answers.length === 1 ? "" : "s"} found; at least 3 are needed.`);
+      loadClass(c);
+      setUpload({
+        state: "done",
+        name: file.name,
+        found: c.answers.length,
+        inPdf: c.answers.filter((a) => a.inPdf).length,
+        how: data.how,
+        model: data.model + (data.usedFallback ? " (fallback)" : ""),
+      });
+      setTimeout(() => document.getElementById("workspace")?.scrollIntoView({ block: "start" }), 50);
+    } catch (err) {
+      setUpload({ state: "error", message: (err as Error).message || "Could not read this PDF." });
+    }
+  }
+
+  async function trySamplePdf() {
+    const res = await fetch("/samples/class-test-infix.pdf");
+    const blob = await res.blob();
+    void uploadPdf(new File([blob], "class-test-infix.pdf", { type: "application/pdf" }));
+  }
+
   function reset() {
     abort.current?.abort();
     setEvents([]);
@@ -198,19 +249,75 @@ export function MarkApp() {
       <div id="workspace" className="mm-grid scroll-mt-4">
         {/* QUESTION */}
         <section className="mm-a-q mm-card blue" aria-labelledby="q-h">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="mm-mono mm-small mm-muted">SAMPLE CLASS · DATA STRUCTURES · QUESTION 7 · {max} MARKS</div>
+          <div className="mm-upload" aria-live="polite">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className={`mm-btn yellow small${upload.state === "reading" || busy ? " is-disabled" : ""}`}>
+                Upload a PDF
+                <input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  className="sr-only"
+                  disabled={upload.state === "reading" || busy}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (f) void uploadPdf(f);
+                  }}
+                />
+              </label>
+              <span className="mm-small">
+                of typed answer scripts: one question, up to 4 MB.{" "}
+                <button type="button" className="mm-linkbtn" onClick={trySamplePdf} disabled={upload.state === "reading" || busy}>
+                  Try our sample PDF
+                </button>
+                {cls.source === "pdf" && (
+                  <>
+                    {" · "}
+                    <button type="button" className="mm-linkbtn" onClick={() => (loadClass(sampleData), setUpload({ state: "idle" }))} disabled={busy}>
+                      back to the sample class
+                    </button>
+                  </>
+                )}
+              </span>
+            </div>
+            {upload.state === "reading" && (
+              <p className="mm-small mm-running mt-2 mb-0">
+                ● Reading {upload.name}: text out of the PDF <span className="mm-badge CODE">TOOL</span> → question and answers <span className="mm-badge MODEL">MODEL</span> → every
+                answer checked against the PDF <span className="mm-badge CODE">CODE</span>
+              </p>
+            )}
+            {upload.state === "done" && cls.source === "pdf" && (
+              <p className="mm-small mt-2 mb-0">
+                <span className="mm-ok">✓ {upload.found} answers found in {upload.name}</span> ·{" "}
+                {upload.inPdf === upload.found ? (
+                  <span className="mm-ok">✓ all {upload.found} found word for word in the PDF</span>
+                ) : (
+                  <span className="mm-bad">✗ {upload.found - upload.inPdf} not found word for word: check those cards</span>
+                )}{" "}
+                · <span className="mm-muted">read by {upload.how === "rules" ? "fixed rules (models unreachable)" : upload.model}</span>
+              </p>
+            )}
+            {upload.state === "error" && (
+              <p className="mm-small mm-bad mt-2 mb-0" role="alert">
+                ✗ {upload.message} The sample class is still loaded.
+              </p>
+            )}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="mm-mono mm-small mm-muted">
+              {cls.title} · {max} MARKS
+            </div>
             <span className="mm-tag" style={{ color: "var(--primary)" }}>
-              {sampleClass.answers.length} ANSWERS
+              {cls.answers.length} ANSWERS
             </span>
           </div>
           <h2 id="q-h" className="my-2 text-[26px] leading-tight sm:text-[32px]">
-            {sampleClass.question}
+            {cls.question}
           </h2>
           <div className="mt-3 rounded-[10px] border-2 border-dashed border-border-strong bg-surface-2 px-3.5 py-2.5">
-            <div className="mm-mono mm-small mm-muted">YOUR MARKING SCHEME · MAX {max}</div>
+            <div className="mm-mono mm-small mm-muted">{cls.schemeNote.toUpperCase()} · MAX {max}</div>
             <ul className="m-0 mt-1 list-none p-0">
-              {sampleClass.scheme.map((c) => (
+              {cls.scheme.map((c) => (
                 <li key={c.id} className="flex items-baseline justify-between gap-3 py-0.5">
                   <span>
                     <span className="mm-mono mm-small mm-muted">{c.id}</span> {c.text}
@@ -227,11 +334,15 @@ export function MarkApp() {
             <div className="mm-section-h mb-2">
               <span className="mm-mono mm-small">THE PILE</span>
               <span className="mm-small mm-muted">
-                <b className="text-foreground">{filled} of 6</b> marked by you · 10 kept back to test it · {sampleClass.answers.length - 16} more
+                <b className="text-foreground">
+                  {filled} of {nSix}
+                </b>{" "}
+                marked by you ·{" "}
+                {hasReal ? `${nUnseen} kept back to test it · ${cls.answers.length - nSix - nUnseen} more` : `${nUnseen} for the tool to mark`}
               </span>
             </div>
             <div className="mm-pile" aria-hidden="true">
-              {sampleClass.answers.map((a, n) => {
+              {cls.answers.map((a, n) => {
                 const k = kind(a.id);
                 return (
                   <span
@@ -264,7 +375,7 @@ export function MarkApp() {
           </div>
           <p className="mm-small mm-muted mt-2 mb-0 max-w-[60ch]">
             {!sixDone
-              ? `Enter ${6 - filled} more of your marks to start.`
+              ? `Enter ${nSix - filled} more of your marks to start${cls.source === "pdf" ? ": mark the first answers the way you would on paper" : ""}.`
               : breakIt
                 ? "Break it swaps one quote the model returns for a line that is not in the answer, so you can watch the check throw it out."
                 : "Your six marks are in."}
@@ -277,10 +388,10 @@ export function MarkApp() {
             <h2 id="steps-h" className="text-[26px]">
               How it marks
             </h2>
-            <span className="mm-mono mm-small mm-muted">{RAIL.filter((s) => flags.match || !s.match).length} STEPS</span>
+            <span className="mm-mono mm-small mm-muted">{RAIL.filter((s) => (flags.match || !s.match) && (hasReal || s.id !== "agreement")).length} STEPS</span>
           </div>
           <ol className="m-0 mt-1 list-none p-0">
-            {RAIL.filter((s) => flags.match || !s.match).map((s, n) => {
+            {RAIL.filter((s) => (flags.match || !s.match) && (hasReal || s.id !== "agreement")).map((s, n) => {
               const st = stepStatus(s.id);
               const live = v.steps[s.id]?.label;
               return (
@@ -290,7 +401,7 @@ export function MarkApp() {
                   </span>
                   <span>
                     <span className="flex flex-wrap items-center gap-2">
-                      <b className="font-semibold">{s.label}</b>
+                      <b className="font-semibold">{s.id === "mark" && !hasReal ? "Mark the rest" : s.label}</b>
                       <span className={`mm-badge ${s.role}`}>{s.role}</span>
                     </span>
                     <span className="mm-small mm-muted block">
@@ -438,7 +549,7 @@ export function MarkApp() {
                         </div>
                       ))}
                       <button type="button" className="mm-btn mt-1" onClick={approveScheme}>
-                        Approve and mark the 10 unseen
+                        Approve and mark the {nUnseen} {hasReal ? "unseen" : "others"}
                       </button>
                     </>
                   ) : (
@@ -461,7 +572,7 @@ export function MarkApp() {
               </div>
               <p className="mm-small mt-1 mb-0">
                 <a className="mm-anchor" href={`#ans-${planted.answerId}`}>
-                  {sampleClass.answers.find((a) => a.id === planted.answerId)?.label}
+                  {cls.answers.find((a) => a.id === planted.answerId)?.label}
                 </a>
                 : <s>“{planted.quote}”</s> is not in the answer → mark thrown out → re-asked once
                 {finalMarks[planted.answerId] ? <span className="mm-ok"> → ✓ fixed on try 2</span> : <span className="mm-bad"> → sent to you unmarked</span>}
@@ -476,9 +587,9 @@ export function MarkApp() {
             <div className="mm-filter" role="group" aria-label="Show answers">
               {(
                 [
-                  ["all", `All ${sampleClass.answers.length}`],
-                  ["six", "Your 6"],
-                  ["unseen", "Unseen 10"],
+                  ["all", `All ${cls.answers.length}`],
+                  ["six", `Your ${nSix}`],
+                  ["unseen", `${hasReal ? "Unseen" : "To mark"} ${nUnseen}`],
                 ] as const
               ).map(([f, label]) => (
                 <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)}>
@@ -496,7 +607,7 @@ export function MarkApp() {
               const thrown = k === "unseen" && !tool && rej.some((r) => r.final);
               const edit = edits[a.id];
               const edited = tool && edit !== undefined && edit !== "" && Number(edit) !== tool.total;
-              const real = sampleClass.answers.find((x) => x.id === a.id)!.grader1;
+              const real = a.real ?? 0;
               const miss = k === "unseen" && tool && showReal && tool.total !== real;
               const caught = rej.some((r) => r.planted) && !!tool;
               return (
@@ -511,16 +622,17 @@ export function MarkApp() {
                         <span className="mm-mono mm-small mm-muted">{a.label.toUpperCase()}</span>
                         {k === "unseen" && (
                           <span className="mm-tag" style={{ color: "var(--primary)" }}>
-                            UNSEEN · TESTS THE TOOL
+                            {hasReal ? "UNSEEN · TESTS THE TOOL" : "THE TOOL MARKS THIS"}
                           </span>
                         )}
                         {k === "rest" && events.length > 0 && <span className="mm-tag mm-muted">NOT IN THIS RUN</span>}
+                        {a.inPdf === false && <span className="mm-tag mm-bad">✗ NOT WORD FOR WORD IN THE PDF</span>}
                       </div>
                       <p className="mt-1.5 mb-0 text-[21px] break-words">{tool ? withQuotes(a.text, tool.criteria.map((c) => c.quote)) : a.text}</p>
                       {tool && (
                         <ul className="mm-crit">
                           {tool.criteria.map((c) => {
-                            const crit = sampleClass.scheme.find((s) => s.id === c.criterionId);
+                            const crit = cls.scheme.find((s) => s.id === c.criterionId);
                             return (
                               <li key={c.criterionId}>
                                 <span className="mm-mono">
@@ -645,9 +757,26 @@ export function MarkApp() {
             <h2 className="text-[26px]">Proof</h2>
             <div className="mt-2 rounded-[10px] border-2 border-dashed border-primary bg-surface-2 p-3">
               <div className="mm-small">
-                <b>This tool vs you</b>, same mark on 10 answers it had not seen
+                <b>This tool vs you</b>, {hasReal ? `same mark on ${nUnseen} answers it had not seen` : `same mark on your ${nSix}`}
               </div>
-              {v.agreement.before ? (
+              {!hasReal ? (
+                v.scheme ? (
+                  <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+                    <span className="mm-num text-[64px]" style={{ color: "var(--primary)" }}>
+                      {v.scheme.matches}
+                    </span>
+                    <span className="mm-small">
+                      of {v.scheme.of}
+                      {v.rounds[0] && v.rounds[0].matches !== v.scheme.matches ? ` · was ${v.rounds[0].matches} with the scheme as typed` : ""}
+                    </span>
+                    <div className="mm-small mm-muted w-full">Your PDF has no marks for the other answers, so your six are the test. Check its marks before you approve.</div>
+                  </div>
+                ) : (
+                  <div className="mm-mono mm-small mt-1" style={{ color: "var(--primary)" }}>
+                    {busy ? "measuring…" : "measured when you run it"}
+                  </div>
+                )
+              ) : v.agreement.before ? (
                 <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
                   {v.agreement.after ? (
                     <>

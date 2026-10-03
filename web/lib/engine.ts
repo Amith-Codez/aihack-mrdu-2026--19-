@@ -183,7 +183,7 @@ async function callNotes(ctx: Ctx, six: Answer[], marks: Map<string, AnswerMark 
 async function tune(ctx: Ctx) {
   const { req, emit } = ctx;
   const six = req.answers.filter((a) => req.teacherMarks.some((t) => t.answerId === a.id));
-  emit({ type: "step", id: "split", role: "CODE", label: `your ${six.length} + ${(req.heldOutMarks ?? []).length} unseen`, status: "done" });
+  emit({ type: "step", id: "split", role: "CODE", label: (req.heldOutMarks ?? []).length ? `your ${six.length} + ${(req.heldOutMarks ?? []).length} unseen` : `your ${six.length} + ${req.answers.length - six.length} to mark`, status: "done" });
   if (six.length < 2) throw new Error("Mark at least two answers yourself first.");
 
   emit({ type: "step", id: "match", role: "AGENT", label: "marking your six", status: "running" });
@@ -227,9 +227,11 @@ async function mark(ctx: Ctx) {
   emit({ type: "step", id: "mark", role: "MODEL", label: `${targets.length} answers, ${BATCH} per call`, status: "running" });
   emit({ type: "step", id: "checks", role: "CODE", label: "checking every quote", status: "running" });
   // One phase after the other, so at most PARALLEL calls run at once (free-tier limits).
-  const before = await markAll(ctx, targets, [], "before", { plant: req.breakIt && !tuned });
+  // With real marks held back (the sample class) we mark twice to show before → after.
+  // An uploaded class has no real marks to compare with, so it is marked once, with the approved notes.
+  const before = held.length || !tuned ? await markAll(ctx, targets, [], "before", { plant: req.breakIt && !tuned }) : new Map<string, AnswerMark | null>();
   const after = tuned ? await markAll(ctx, targets, req.notes, "after", { plant: req.breakIt }) : null;
-  emit({ type: "step", id: "mark", role: "MODEL", label: `${targets.length} marked${tuned ? " twice (before + after)" : ""}`, status: "done" });
+  emit({ type: "step", id: "mark", role: "MODEL", label: `${targets.length} marked${tuned && held.length ? " twice (before + after)" : ""}`, status: "done" });
   emit({ type: "step", id: "checks", role: "CODE", label: "every mark checked", status: "done" });
 
   if (held.length) {

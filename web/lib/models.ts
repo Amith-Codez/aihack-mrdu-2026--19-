@@ -61,3 +61,17 @@ export async function askObject<T>(
 export async function askDirect<T>(which: "primary" | "fallback", schema: z.ZodType<T>, prompt: string) {
   return once(which === "primary" ? primary() : fallback(), schema, "Reply with JSON only.", prompt);
 }
+
+/** One structured call with a file attached (a scanned PDF). Gemini reads PDFs; Groq cannot, so there is no fallback. */
+export async function askObjectWithFile<T>(schema: z.ZodType<T>, instructions: string, prompt: string, data: Uint8Array, mediaType: string, signal?: AbortSignal) {
+  const timeout = AbortSignal.timeout(60_000);
+  const r = await generateText({
+    model: primary(),
+    instructions,
+    messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "file", data, mediaType }] }],
+    output: Output.object({ schema }),
+    maxRetries: 0,
+    abortSignal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+  });
+  return { object: r.output as T, model: primaryId(), usedFallback: false, inputTokens: r.usage.inputTokens ?? 0, outputTokens: r.usage.outputTokens ?? 0 };
+}
