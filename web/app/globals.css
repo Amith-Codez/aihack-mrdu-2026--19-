@@ -200,6 +200,11 @@
   .mm-btn.small { font-size: 17px; padding: 9px 16px; box-shadow: 4px 4px 0 var(--foreground); }
   .mm-btn.is-disabled { opacity: .55; pointer-events: none; }
   .mm-btn:has(input:focus-visible) { outline: 3px solid var(--primary); outline-offset: 3px; }
+  .mm-dist { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .mm-dist li { display: grid; grid-template-columns: 18px minmax(0, 1fr) 26px; gap: 8px; align-items: center; }
+  .mm-dist-track { height: 14px; border: 2px solid var(--ink); border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+  .mm-dist-fill { display: block; height: 100%; background: var(--primary); }
+  .mm-tally { list-style: none; margin: 12px 0 0; padding: 10px 0 0; border-top: 2px dotted var(--border-strong); display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
   @media (prefers-reduced-motion: reduce) { .mm-round { transition: none; } }
 
   /* the workspace grid: question → steps → answers → approve → proof on phones */

@@ -222,6 +222,42 @@ export function MarkApp() {
   );
   const planted = v.rejected.find((r) => r.planted);
 
+  // Class summary + export (from the real marks on screen; her six count as hers)
+  const finalValue = (id: string): number | undefined => {
+    const e = edits[id];
+    if (e !== undefined && e !== "" && finalMarks[id]) return Number(e);
+    return finalMarks[id]?.total;
+  };
+  const toolIds = UNSEEN_IDS.filter((id) => finalMarks[id]);
+  const sentToYou = UNSEEN_IDS.filter((id) => !finalMarks[id] && v.rejected.some((r) => r.answerId === id && r.final && r.phase === finalPhase));
+  const classMarks = [...SIX_IDS.map((id) => Number(six[id])), ...toolIds.map((id) => finalValue(id)!)];
+  const avg = classMarks.length ? classMarks.reduce((a, b) => a + b, 0) / classMarks.length : 0;
+  const dist = Array.from({ length: max + 1 }, (_, m) => classMarks.filter((x) => x === m).length).map((count, mark) => ({ mark, count })).reverse();
+  const peak = Math.max(1, ...dist.map((d) => d.count));
+
+  function downloadCsv() {
+    const esc = (x: string | number) => `"${String(x).replace(/"/g, '""')}"`;
+    const head = ["Student", "Answer", "Marked by", "Mark", "Out of", "Edited by teacher", "Evidence (quoted from the answer)", "Checks", ...(hasReal ? ["Real examiner mark"] : [])];
+    const rows = [...SIX_IDS, ...UNSEEN_IDS].map((id) => {
+      const a = cls.answers.find((x) => x.id === id)!;
+      const m = finalMarks[id];
+      const mine = SIX_IDS.includes(id);
+      const evidence = m ? m.criteria.filter((c) => c.awarded > 0).map((c) => `${c.criterionId} ${c.awarded}: ${c.quote}`).join(" | ") : "";
+      const by = mine ? "Teacher" : m ? (phase === "approved" ? "MarkMatch, approved by teacher" : "MarkMatch, not yet approved") : "Sent to teacher unmarked";
+      const mark = mine ? six[id] : (finalValue(id) ?? "");
+      const edited = !mine && m && edits[id] !== undefined && edits[id] !== "" && Number(edits[id]) !== m.total ? "yes" : "";
+      const checks = mine ? "" : m ? "quote in answer ✓; marks add up ✓" : "failed twice";
+      return [a.label, a.text, by, mark, max, edited, evidence, checks, ...(hasReal ? [a.real ?? ""] : [])];
+    });
+    const csv = "\uFEFF" + [head, ...rows].map((r) => r.map(esc).join(",")).join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `markmatch-${cls.source === "pdf" ? "uploaded-class" : "sample-class"}.csv`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   return (
     <main className="mm-wrap">
       <header className="mm-bar">
@@ -269,7 +305,10 @@ export function MarkApp() {
                 of typed answer scripts: one question, up to 4 MB.{" "}
                 <button type="button" className="mm-linkbtn" onClick={trySamplePdf} disabled={upload.state === "reading" || busy}>
                   Try our sample PDF
-                </button>
+                </button>{" "}
+                <a className="mm-linkbtn" href="/samples/class-test-infix.pdf" target="_blank" rel="noopener noreferrer">
+                  (see it)
+                </a>
                 {cls.source === "pdf" && (
                   <>
                     {" · "}
@@ -459,7 +498,11 @@ export function MarkApp() {
               <p className="mm-small mm-muted mt-1 mb-3">It marks your six, compares with your marks, rewrites its notes and tries again. Code keeps a round only if it matches you more.</p>
               {v.scheme && (
                 <p className="mm-verdict">
-                  {v.scheme.notes.length ? (
+                  {v.scheme.notes.length && v.rounds[0] && v.scheme.matches === v.rounds[0].matches ? (
+                    <>
+                      ✓ Its notes bring it closer to you: total gap {v.rounds[0].gap} → {kept?.gap}, still {v.scheme.matches} of {v.scheme.of} exact
+                    </>
+                  ) : v.scheme.notes.length ? (
                     <>
                       ✓ Its notes now match you on {v.scheme.matches} of {v.scheme.of} (was {v.rounds[0]?.matches} of {v.rounds[0]?.of})
                     </>
@@ -752,7 +795,52 @@ export function MarkApp() {
                 )}
               </>
             )}
+            {(phase === "review" || phase === "approved") && (
+              <button type="button" className="mm-btn ghost small mt-4" onClick={downloadCsv}>
+                ⬇ Download marks for Excel
+              </button>
+            )}
           </div>
+          {(phase === "review" || phase === "approved") && classMarks.length > 0 && (
+            <div className="mm-card blue">
+              <h2 className="text-[26px]">Class summary</h2>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="mm-num text-[44px]">{avg.toFixed(1)}</span>
+                <span className="mm-small">
+                  average out of {max} · {classMarks.length} students
+                </span>
+              </div>
+              <ul className="mm-dist" aria-label="How many students got each mark">
+                {dist.map((d) => (
+                  <li key={d.mark}>
+                    <span className="mm-mono">{d.mark}</span>
+                    <span className="mm-dist-track">
+                      <span className="mm-dist-fill" style={{ width: `${(d.count / peak) * 100}%` }} />
+                    </span>
+                    <span className="mm-mono mm-small">{d.count}</span>
+                  </li>
+                ))}
+              </ul>
+              <ul className="mm-tally">
+                <li>
+                  <span className="mm-ok">✓ {toolIds.length}</span> marked by the tool, every quote checked
+                </li>
+                <li>
+                  <span className="mm-mono">✍ {nSix}</span> marked by you
+                </li>
+                {editedCount > 0 && (
+                  <li>
+                    <span className="mm-bad">✎ {editedCount}</span> changed by you
+                  </li>
+                )}
+                {sentToYou.length > 0 && (
+                  <li>
+                    <span className="mm-bad">✗ {sentToYou.length}</span> sent to you unmarked
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
           <Reveal className="mm-card">
             <h2 className="text-[26px]">Proof</h2>
             <div className="mt-2 rounded-[10px] border-2 border-dashed border-primary bg-surface-2 p-3">
